@@ -1,0 +1,39 @@
+{% extends 'hospital/doctor_base.html' %}
+{% load static %}
+{% block content %}
+<div class="container" style="margin-top: 80px;">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="card">
+        <div class="card-header bg-primary text-white text-center">
+          <h5 class="mb-0">患者绑定医生二维码</h5>
+        </div>
+        <div class="card-body text-center">
+          <p>小程序扫描下方二维码后，将自动跳转到绑定流程。</p>
+          {% if qr_image_data_uri %}
+            <img src="{{ qr_image_data_uri }}" alt="Doctor Bind QR Code" style="max-width: 280px; width: 100%; height: auto; border:8px solid #f1f1f1; padding:8px; border-radius:8px;"/>
+          {% else %}
+            <div class="alert alert-warning" role="alert">
+              无法生成二维码。{{ qr_error|default:'请联系管理员安装依赖。' }}
+            </div>
+          {% endif %}
+          <div class="mt-3">
+            <p class="text-muted" style="word-break: break-all;">绑定接口：<code>{{ bind_url }}</code></p>
+            <p class="text-muted">医生ID：<code>{{ doctor_user_id }}</code></p>
+          </div>
+          <hr/>
+          <div class="alert alert-info text-left" role="alert">
+            <h6>接入说明（给小程序端）</h6>
+            <ol class="mb-0">
+              <li>扫描二维码后，解析其中的 JSON，获取 <code>doctor_id</code> 和 <code>bind_api</code>。</li>
+              <li>使用已登录患者的 Token 在请求头中带上 <code>Authorization: Token &lt;token&gt;</code>。</li>
+              <li>向 <code>bind_api</code> 发起 POST 请求，Body: <code>{"doctor_id": &lt;int&gt;}</code>。</li>
+              <li>若患者已绑定过医生，接口会返回错误提示。</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock content %}
