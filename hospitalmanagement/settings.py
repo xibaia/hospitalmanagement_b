@@ -157,6 +157,8 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 20
 }
 
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
+
 LOGIN_REDIRECT_URL='/afterlogin'
 
 #for contact us give your gmail id and password

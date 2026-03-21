@@ -9,7 +9,10 @@
       "Bash(pandoc --track-changes=all /tmp/manual.docx -o /tmp/manual.md)",
       "Bash(python3:*)",
       "Bash(DJANGO_ENV=production DB_PASSWORD=test python3 manage.py check 2>&1)",
-      "Bash(DJANGO_ENV=production DB_PASSWORD=test python3 manage.py check --deploy 2>&1)"
+      "Bash(DJANGO_ENV=production DB_PASSWORD=test python3 manage.py check --deploy 2>&1)",
+      "Bash(python -c \"import django; django.setup\\(\\)\")",
+      "Bash(python -m py_compile hospital/models.py)",
+      "Bash(pip3 install:*)"
     ]
   },
   "enabledMcpjsonServers": [
