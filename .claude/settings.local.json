@@ -12,7 +12,13 @@
       "Bash(DJANGO_ENV=production DB_PASSWORD=test python3 manage.py check --deploy 2>&1)",
       "Bash(python -c \"import django; django.setup\\(\\)\")",
       "Bash(python -m py_compile hospital/models.py)",
-      "Bash(pip3 install:*)"
+      "Bash(pip3 install:*)",
+      "Bash(sed -i '' 's/@user_passes_test\\(is_doctor\\)$/@user_passes_test\\(is_doctor, login_url=\"\"doctorlogin\"\"\\)/g' hospital/views.py)",
+      "Bash(sed -i '' 's/@user_passes_test\\(is_admin\\)$/@user_passes_test\\(is_admin, login_url=\"\"adminlogin\"\"\\)/g' hospital/views.py)",
+      "Bash(sed -i '' 's/@user_passes_test\\(is_patient\\)$/@user_passes_test\\(is_patient, login_url=\"\"patientlogin\"\"\\)/g' hospital/views.py)",
+      "Bash(grep -l \"style.*menu\\\\|menu.*style\\\\|font-size\" templates/hospital/doctor_*.html)",
+      "Read(//Users/songmingyang/.claude/**)",
+      "Read(//Users/songmingyang/WeChatProjects/hospitalmanagement_b/**)"
     ]
   },
   "enabledMcpjsonServers": [

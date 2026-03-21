@@ -144,7 +144,7 @@ def afterlogin_view(request):
 #------------------------ ADMIN RELATED VIEWS START ------------------------------
 #---------------------------------------------------------------------------------
 @login_required(login_url='adminlogin')
-@user_passes_test(is_admin)
+@user_passes_test(is_admin, login_url="adminlogin")
 def admin_dashboard_view(request):
     #for both table in admin dashboard
     doctors=models.Doctor.objects.all().order_by('-id')
@@ -158,6 +158,13 @@ def admin_dashboard_view(request):
 
     appointmentcount=models.Appointment.objects.all().filter(status=True).count()
     pendingappointmentcount=models.Appointment.objects.all().filter(status=False).count()
+
+    activitycount = models.Activity.objects.count()
+    volunteercount = models.Volunteer.objects.filter(status=True).count()
+    pendingvolunteercount = models.Volunteer.objects.filter(status=False).count()
+    stationcount = models.Station.objects.filter(is_active=True).count()
+    recordcount = models.MedicalRecord.objects.count()
+
     mydict={
     'doctors':doctors,
     'patients':patients,
@@ -167,20 +174,25 @@ def admin_dashboard_view(request):
     'pendingpatientcount':pendingpatientcount,
     'appointmentcount':appointmentcount,
     'pendingappointmentcount':pendingappointmentcount,
+    'activitycount':activitycount,
+    'volunteercount':volunteercount,
+    'pendingvolunteercount':pendingvolunteercount,
+    'stationcount':stationcount,
+    'recordcount':recordcount,
     }
     return render(request,'hospital/admin_dashboard.html',context=mydict)
 
 
 # this view for sidebar click on admin page
 @login_required(login_url='adminlogin')
-@user_passes_test(is_admin)
+@user_passes_test(is_admin, login_url="adminlogin")
 def admin_doctor_view(request):
     return render(request,'hospital/admin_doctor.html')
 
 
 
 @login_required(login_url='adminlogin')
-@user_passes_test(is_admin)
+@user_passes_test(is_admin, login_url="adminlogin")
 def admin_view_doctor_view(request):
     doctors=models.Doctor.objects.all().filter(status=True)
     return render(request,'hospital/admin_view_doctor.html',{'doctors':doctors})
@@ -188,7 +200,7 @@ def admin_view_doctor_view(request):
 
 
 @login_required(login_url='adminlogin')
-@user_passes_test(is_admin)
+@user_passes_test(is_admin, login_url="adminlogin")
 def delete_doctor_from_hospital_view(request,pk):
     doctor=models.Doctor.objects.get(id=pk)
     user=models.User.objects.get(id=doctor.user_id)
@@ -199,7 +211,7 @@ def delete_doctor_from_hospital_view(request,pk):
 
 
 @login_required(login_url='adminlogin')
-@user_passes_test(is_admin)
+@user_passes_test(is_admin, login_url="adminlogin")
 def update_doctor_view(request,pk):
     doctor=models.Doctor.objects.get(id=pk)
     user=models.User.objects.get(id=doctor.user_id)
@@ -224,7 +236,7 @@ def update_doctor_view(request,pk):
 
 
 @login_required(login_url='adminlogin')
-@user_passes_test(is_admin)
+@user_passes_test(is_admin, login_url="adminlogin")
 def admin_add_doctor_view(request):
     userForm=forms.DoctorUserForm()
     doctorForm=forms.DoctorForm()
@@ -252,7 +264,7 @@ def admin_add_doctor_view(request):
 
 
 @login_required(login_url='adminlogin')
-@user_passes_test(is_admin)
+@user_passes_test(is_admin, login_url="adminlogin")
 def admin_approve_doctor_view(request):
     #those whose approval are needed
     doctors=models.Doctor.objects.all().filter(status=False)
@@ -260,7 +272,7 @@ def admin_approve_doctor_view(request):
 
 
 @login_required(login_url='adminlogin')
-@user_passes_test(is_admin)
+@user_passes_test(is_admin, login_url="adminlogin")
 def approve_doctor_view(request,pk):
     doctor=models.Doctor.objects.get(id=pk)
     doctor.status=True
@@ -269,7 +281,7 @@ def approve_doctor_view(request,pk):
 
 
 @login_required(login_url='adminlogin')
-@user_passes_test(is_admin)
+@user_passes_test(is_admin, login_url="adminlogin")
 def reject_doctor_view(request,pk):
     doctor=models.Doctor.objects.get(id=pk)
     user=models.User.objects.get(id=doctor.user_id)
@@ -280,7 +292,7 @@ def reject_doctor_view(request,pk):
 
 
 @login_required(login_url='adminlogin')
-@user_passes_test(is_admin)
+@user_passes_test(is_admin, login_url="adminlogin")
 def admin_view_doctor_specialisation_view(request):
     doctors=models.Doctor.objects.all().filter(status=True)
     return render(request,'hospital/admin_view_doctor_specialisation.html',{'doctors':doctors})
@@ -288,14 +300,14 @@ def admin_view_doctor_specialisation_view(request):
 
 
 @login_required(login_url='adminlogin')
-@user_passes_test(is_admin)
+@user_passes_test(is_admin, login_url="adminlogin")
 def admin_patient_view(request):
     return render(request,'hospital/admin_patient.html')
 
 
 
 @login_required(login_url='adminlogin')
-@user_passes_test(is_admin)
+@user_passes_test(is_admin, login_url="adminlogin")
 def admin_view_patient_view(request):
     patients=models.Patient.objects.all().filter(status=True)
     return render(request,'hospital/admin_view_patient.html',{'patients':patients})
@@ -303,7 +315,7 @@ def admin_view_patient_view(request):
 
 
 @login_required(login_url='adminlogin')
-@user_passes_test(is_admin)
+@user_passes_test(is_admin, login_url="adminlogin")
 def delete_patient_from_hospital_view(request,pk):
     patient=models.Patient.objects.get(id=pk)
     user=models.User.objects.get(id=patient.user_id)
@@ -314,7 +326,7 @@ def delete_patient_from_hospital_view(request,pk):
 
 
 @login_required(login_url='adminlogin')
-@user_passes_test(is_admin)
+@user_passes_test(is_admin, login_url="adminlogin")
 def update_patient_view(request,pk):
     patient=models.Patient.objects.get(id=pk)
     user=models.User.objects.get(id=patient.user_id)
@@ -341,7 +353,7 @@ def update_patient_view(request,pk):
 
 
 @login_required(login_url='adminlogin')
-@user_passes_test(is_admin)
+@user_passes_test(is_admin, login_url="adminlogin")
 def admin_add_patient_view(request):
     userForm=forms.PatientUserForm()
     patientForm=forms.PatientForm()
@@ -370,7 +382,7 @@ def admin_add_patient_view(request):
 
 #------------------FOR APPROVING PATIENT BY ADMIN----------------------
 @login_required(login_url='adminlogin')
-@user_passes_test(is_admin)
+@user_passes_test(is_admin, login_url="adminlogin")
 def admin_approve_patient_view(request):
     #those whose approval are needed
     patients=models.Patient.objects.all().filter(status=False)
@@ -379,7 +391,7 @@ def admin_approve_patient_view(request):
 
 
 @login_required(login_url='adminlogin')
-@user_passes_test(is_admin)
+@user_passes_test(is_admin, login_url="adminlogin")
 def approve_patient_view(request,pk):
     patient=models.Patient.objects.get(id=pk)
     patient.status=True
@@ -389,7 +401,7 @@ def approve_patient_view(request,pk):
 
 
 @login_required(login_url='adminlogin')
-@user_passes_test(is_admin)
+@user_passes_test(is_admin, login_url="adminlogin")
 def reject_patient_view(request,pk):
     patient=models.Patient.objects.get(id=pk)
     user=models.User.objects.get(id=patient.user_id)
@@ -401,7 +413,7 @@ def reject_patient_view(request,pk):
 
 #--------------------- FOR DISCHARGING PATIENT BY ADMIN START-------------------------
 @login_required(login_url='adminlogin')
-@user_passes_test(is_admin)
+@user_passes_test(is_admin, login_url="adminlogin")
 def admin_discharge_patient_view(request):
     patients=models.Patient.objects.all().filter(status=True)
     return render(request,'hospital/admin_discharge_patient.html',{'patients':patients})
@@ -409,7 +421,7 @@ def admin_discharge_patient_view(request):
 
 
 @login_required(login_url='adminlogin')
-@user_passes_test(is_admin)
+@user_passes_test(is_admin, login_url="adminlogin")
 def discharge_patient_view(request,pk):
     patient=models.Patient.objects.get(id=pk)
     days=(date.today()-patient.admitDate) #2 days, 0:00:00
@@ -499,14 +511,14 @@ def download_pdf_view(request,pk):
 
 #-----------------APPOINTMENT START--------------------------------------------------------------------
 @login_required(login_url='adminlogin')
-@user_passes_test(is_admin)
+@user_passes_test(is_admin, login_url="adminlogin")
 def admin_appointment_view(request):
     return render(request,'hospital/admin_appointment.html')
 
 
 
 @login_required(login_url='adminlogin')
-@user_passes_test(is_admin)
+@user_passes_test(is_admin, login_url="adminlogin")
 def admin_view_appointment_view(request):
     appointments=models.Appointment.objects.all().filter(status=True)
     return render(request,'hospital/admin_view_appointment.html',{'appointments':appointments})
@@ -514,7 +526,7 @@ def admin_view_appointment_view(request):
 
 
 @login_required(login_url='adminlogin')
-@user_passes_test(is_admin)
+@user_passes_test(is_admin, login_url="adminlogin")
 def admin_add_appointment_view(request):
     appointmentForm=forms.AppointmentForm()
     mydict={'appointmentForm':appointmentForm,}
@@ -534,7 +546,7 @@ def admin_add_appointment_view(request):
 
 
 @login_required(login_url='adminlogin')
-@user_passes_test(is_admin)
+@user_passes_test(is_admin, login_url="adminlogin")
 def admin_approve_appointment_view(request):
     #those whose approval are needed
     appointments=models.Appointment.objects.all().filter(status=False)
@@ -543,7 +555,7 @@ def admin_approve_appointment_view(request):
 
 
 @login_required(login_url='adminlogin')
-@user_passes_test(is_admin)
+@user_passes_test(is_admin, login_url="adminlogin")
 def approve_appointment_view(request,pk):
     appointment=models.Appointment.objects.get(id=pk)
     appointment.status=True
@@ -553,7 +565,7 @@ def approve_appointment_view(request,pk):
 
 
 @login_required(login_url='adminlogin')
-@user_passes_test(is_admin)
+@user_passes_test(is_admin, login_url="adminlogin")
 def reject_appointment_view(request,pk):
     appointment=models.Appointment.objects.get(id=pk)
     appointment.delete()
@@ -571,7 +583,7 @@ def reject_appointment_view(request,pk):
 #------------------------ DOCTOR RELATED VIEWS START ------------------------------
 #---------------------------------------------------------------------------------
 @login_required(login_url='doctorlogin')
-@user_passes_test(is_doctor)
+@user_passes_test(is_doctor, login_url="doctorlogin")
 def doctor_dashboard_view(request):
     #for three cards
     patientcount=models.Patient.objects.all().filter(status=True,assignedDoctorId=request.user.id).count()
@@ -597,7 +609,7 @@ def doctor_dashboard_view(request):
 
 
 @login_required(login_url='doctorlogin')
-@user_passes_test(is_doctor)
+@user_passes_test(is_doctor, login_url="doctorlogin")
 def doctor_patient_view(request):
     mydict={
     'doctor':models.Doctor.objects.get(user_id=request.user.id), #for profile picture of doctor in sidebar
@@ -606,7 +618,7 @@ def doctor_patient_view(request):
 
 
 @login_required(login_url='doctorlogin')
-@user_passes_test(is_doctor)
+@user_passes_test(is_doctor, login_url="doctorlogin")
 def doctor_qrcode_view(request):
     # 生成绑定链接，包含医生的 user_id
     doctor_user_id = request.user.id
@@ -653,7 +665,7 @@ def doctor_qrcode_view(request):
 
 
 @login_required(login_url='doctorlogin')
-@user_passes_test(is_doctor)
+@user_passes_test(is_doctor, login_url="doctorlogin")
 def doctor_view_patient_view(request):
     patients=models.Patient.objects.all().filter(status=True,assignedDoctorId=request.user.id)
     doctor=models.Doctor.objects.get(user_id=request.user.id) #for profile picture of doctor in sidebar
@@ -661,7 +673,7 @@ def doctor_view_patient_view(request):
 
 
 @login_required(login_url='doctorlogin')
-@user_passes_test(is_doctor)
+@user_passes_test(is_doctor, login_url="doctorlogin")
 def search_view(request):
     doctor=models.Doctor.objects.get(user_id=request.user.id) #for profile picture of doctor in sidebar
     # whatever user write in search box we get in query
@@ -672,7 +684,7 @@ def search_view(request):
 
 
 @login_required(login_url='doctorlogin')
-@user_passes_test(is_doctor)
+@user_passes_test(is_doctor, login_url="doctorlogin")
 def doctor_view_discharge_patient_view(request):
     dischargedpatients=models.PatientDischargeDetails.objects.all().distinct().filter(assignedDoctorName=request.user.first_name)
     doctor=models.Doctor.objects.get(user_id=request.user.id) #for profile picture of doctor in sidebar
@@ -681,7 +693,7 @@ def doctor_view_discharge_patient_view(request):
 
 
 @login_required(login_url='doctorlogin')
-@user_passes_test(is_doctor)
+@user_passes_test(is_doctor, login_url="doctorlogin")
 def doctor_appointment_view(request):
     doctor=models.Doctor.objects.get(user_id=request.user.id) #for profile picture of doctor in sidebar
     return render(request,'hospital/doctor_appointment.html',{'doctor':doctor})
@@ -689,7 +701,7 @@ def doctor_appointment_view(request):
 
 
 @login_required(login_url='doctorlogin')
-@user_passes_test(is_doctor)
+@user_passes_test(is_doctor, login_url="doctorlogin")
 def doctor_view_appointment_view(request):
     doctor=models.Doctor.objects.get(user_id=request.user.id) #for profile picture of doctor in sidebar
     appointments=models.Appointment.objects.all().filter(status=True,doctorId=request.user.id)
@@ -703,7 +715,7 @@ def doctor_view_appointment_view(request):
 
 
 @login_required(login_url='doctorlogin')
-@user_passes_test(is_doctor)
+@user_passes_test(is_doctor, login_url="doctorlogin")
 def doctor_delete_appointment_view(request):
     doctor=models.Doctor.objects.get(user_id=request.user.id) #for profile picture of doctor in sidebar
     appointments=models.Appointment.objects.all().filter(status=True,doctorId=request.user.id)
@@ -717,7 +729,7 @@ def doctor_delete_appointment_view(request):
 
 
 @login_required(login_url='doctorlogin')
-@user_passes_test(is_doctor)
+@user_passes_test(is_doctor, login_url="doctorlogin")
 def delete_appointment_view(request,pk):
     appointment=models.Appointment.objects.get(id=pk)
     appointment.delete()
@@ -745,7 +757,7 @@ def delete_appointment_view(request,pk):
 #------------------------ PATIENT RELATED VIEWS START ------------------------------
 #---------------------------------------------------------------------------------
 @login_required(login_url='patientlogin')
-@user_passes_test(is_patient)
+@user_passes_test(is_patient, login_url="patientlogin")
 def patient_dashboard_view(request):
     patient=models.Patient.objects.get(user_id=request.user.id)
     doctor=models.Doctor.objects.get(user_id=patient.assignedDoctorId)
@@ -763,7 +775,7 @@ def patient_dashboard_view(request):
 
 
 @login_required(login_url='patientlogin')
-@user_passes_test(is_patient)
+@user_passes_test(is_patient, login_url="patientlogin")
 def patient_appointment_view(request):
     patient=models.Patient.objects.get(user_id=request.user.id) #for profile picture of patient in sidebar
     return render(request,'hospital/patient_appointment.html',{'patient':patient})
@@ -771,7 +783,7 @@ def patient_appointment_view(request):
 
 
 @login_required(login_url='patientlogin')
-@user_passes_test(is_patient)
+@user_passes_test(is_patient, login_url="patientlogin")
 def patient_book_appointment_view(request):
     appointmentForm=forms.PatientAppointmentForm()
     patient=models.Patient.objects.get(user_id=request.user.id) #for profile picture of patient in sidebar
@@ -816,7 +828,7 @@ def search_doctor_view(request):
 
 
 @login_required(login_url='patientlogin')
-@user_passes_test(is_patient)
+@user_passes_test(is_patient, login_url="patientlogin")
 def patient_view_appointment_view(request):
     patient=models.Patient.objects.get(user_id=request.user.id) #for profile picture of patient in sidebar
     appointments=models.Appointment.objects.all().filter(patientId=request.user.id)
@@ -825,7 +837,7 @@ def patient_view_appointment_view(request):
 
 
 @login_required(login_url='patientlogin')
-@user_passes_test(is_patient)
+@user_passes_test(is_patient, login_url="patientlogin")
 def patient_discharge_view(request):
     patient=models.Patient.objects.get(user_id=request.user.id) #for profile picture of patient in sidebar
     dischargeDetails=models.PatientDischargeDetails.objects.all().filter(patientId=patient.id).order_by('-id')[:1]
@@ -892,6 +904,239 @@ def contactus_view(request):
 #------------------------ ADMIN RELATED VIEWS END ------------------------------
 #---------------------------------------------------------------------------------
 
+
+# =========================================================================
+# ======================== 义诊活动 ACTIVITY VIEWS =========================
+# =========================================================================
+
+@login_required(login_url='adminlogin')
+@user_passes_test(is_admin, login_url="adminlogin")
+def admin_activity_view(request):
+    activities = models.Activity.objects.all().order_by('-created_at')
+    return render(request, 'hospital/admin_activity.html', {'activities': activities})
+
+
+@login_required(login_url='adminlogin')
+@user_passes_test(is_admin, login_url="adminlogin")
+def admin_add_activity_view(request):
+    form = forms.ActivityForm()
+    if request.method == 'POST':
+        form = forms.ActivityForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('admin-activity')
+    return render(request, 'hospital/admin_add_activity.html', {'form': form})
+
+
+@login_required(login_url='adminlogin')
+@user_passes_test(is_admin, login_url="adminlogin")
+def admin_view_activity_view(request, pk):
+    activity = models.Activity.objects.get(id=pk)
+    participants = models.ActivityParticipant.objects.filter(activity=activity).select_related('user')
+    return render(request, 'hospital/admin_view_activity.html', {
+        'activity': activity, 'participants': participants
+    })
+
+
+@login_required(login_url='adminlogin')
+@user_passes_test(is_admin, login_url="adminlogin")
+def update_activity_view(request, pk):
+    activity = models.Activity.objects.get(id=pk)
+    form = forms.ActivityForm(instance=activity)
+    if request.method == 'POST':
+        form = forms.ActivityForm(request.POST, instance=activity)
+        if form.is_valid():
+            form.save()
+            return redirect('admin-activity')
+    return render(request, 'hospital/admin_update_activity.html', {'form': form, 'activity': activity})
+
+
+@login_required(login_url='adminlogin')
+@user_passes_test(is_admin, login_url="adminlogin")
+def delete_activity_view(request, pk):
+    models.Activity.objects.get(id=pk).delete()
+    return redirect('admin-activity')
+
+
+# =========================================================================
+# ======================== 志愿者 VOLUNTEER VIEWS ==========================
+# =========================================================================
+
+@login_required(login_url='adminlogin')
+@user_passes_test(is_admin, login_url="adminlogin")
+def admin_volunteer_view(request):
+    volunteers = models.Volunteer.objects.filter(status=True).select_related('user')
+    pending = models.Volunteer.objects.filter(status=False).select_related('user')
+    return render(request, 'hospital/admin_volunteer.html', {
+        'volunteers': volunteers, 'pending': pending
+    })
+
+
+@login_required(login_url='adminlogin')
+@user_passes_test(is_admin, login_url="adminlogin")
+def admin_add_volunteer_view(request):
+    userForm = forms.VolunteerUserForm()
+    volunteerForm = forms.VolunteerForm()
+    if request.method == 'POST':
+        userForm = forms.VolunteerUserForm(request.POST)
+        volunteerForm = forms.VolunteerForm(request.POST)
+        if userForm.is_valid() and volunteerForm.is_valid():
+            user = userForm.save()
+            user.set_password(user.password)
+            user.save()
+            v = volunteerForm.save(commit=False)
+            v.user = user
+            v.status = True
+            v.save()
+            Group.objects.get_or_create(name='VOLUNTEER')[0].user_set.add(user)
+            return redirect('admin-volunteer')
+    return render(request, 'hospital/admin_add_volunteer.html', {
+        'userForm': userForm, 'volunteerForm': volunteerForm
+    })
+
+
+@login_required(login_url='adminlogin')
+@user_passes_test(is_admin, login_url="adminlogin")
+def approve_volunteer_view(request, pk):
+    models.Volunteer.objects.filter(id=pk).update(status=True)
+    return redirect('admin-volunteer')
+
+
+@login_required(login_url='adminlogin')
+@user_passes_test(is_admin, login_url="adminlogin")
+def reject_volunteer_view(request, pk):
+    v = models.Volunteer.objects.get(id=pk)
+    v.user.delete()  # 级联删除 Volunteer
+    return redirect('admin-volunteer')
+
+
+# =========================================================================
+# ============================ 站点 STATION VIEWS =========================
+# =========================================================================
+
+@login_required(login_url='adminlogin')
+@user_passes_test(is_admin, login_url="adminlogin")
+def admin_station_view(request):
+    stations = models.Station.objects.all().order_by('-id')
+    return render(request, 'hospital/admin_station.html', {'stations': stations})
+
+
+@login_required(login_url='adminlogin')
+@user_passes_test(is_admin, login_url="adminlogin")
+def admin_add_station_view(request):
+    form = forms.StationForm()
+    if request.method == 'POST':
+        form = forms.StationForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('admin-station')
+    return render(request, 'hospital/admin_add_station.html', {'form': form})
+
+
+@login_required(login_url='adminlogin')
+@user_passes_test(is_admin, login_url="adminlogin")
+def update_station_view(request, pk):
+    station = models.Station.objects.get(id=pk)
+    form = forms.StationForm(instance=station)
+    if request.method == 'POST':
+        form = forms.StationForm(request.POST, instance=station)
+        if form.is_valid():
+            form.save()
+            return redirect('admin-station')
+    return render(request, 'hospital/admin_update_station.html', {'form': form, 'station': station})
+
+
+@login_required(login_url='adminlogin')
+@user_passes_test(is_admin, login_url="adminlogin")
+def delete_station_view(request, pk):
+    models.Station.objects.get(id=pk).delete()
+    return redirect('admin-station')
+
+
+# =========================================================================
+# ===================== 病历 MEDICAL RECORD VIEWS (Admin) =================
+# =========================================================================
+
+@login_required(login_url='adminlogin')
+@user_passes_test(is_admin, login_url="adminlogin")
+def admin_medical_records_view(request):
+    records = models.MedicalRecord.objects.all().order_by('-created_at').select_related('patient', 'doctor')
+    return render(request, 'hospital/admin_medical_records.html', {'records': records})
+
+
+@login_required(login_url='adminlogin')
+@user_passes_test(is_admin, login_url="adminlogin")
+def admin_view_record_view(request, pk):
+    record = models.MedicalRecord.objects.get(id=pk)
+    findings = models.ToothFinding.objects.filter(record=record)
+    history = getattr(record.patient, 'medical_history', None)
+    return render(request, 'hospital/admin_view_record.html', {
+        'record': record, 'findings': findings, 'history': history
+    })
+
+
+# =========================================================================
+# ===================== 病历 MEDICAL RECORD VIEWS (Doctor) ================
+# =========================================================================
+
+@login_required(login_url='doctorlogin')
+@user_passes_test(is_doctor, login_url="doctorlogin")
+def doctor_records_view(request):
+    doctor = models.Doctor.objects.get(user_id=request.user.id)
+    records = models.MedicalRecord.objects.filter(doctor=request.user).order_by('-created_at').select_related('patient')
+    return render(request, 'hospital/doctor_records.html', {
+        'doctor': doctor, 'records': records
+    })
+
+
+@login_required(login_url='doctorlogin')
+@user_passes_test(is_doctor, login_url="doctorlogin")
+def doctor_create_record_view(request):
+    doctor = models.Doctor.objects.get(user_id=request.user.id)
+    form = forms.MedicalRecordForm()
+    formset = forms.ToothFindingFormSet()
+    if request.method == 'POST':
+        form = forms.MedicalRecordForm(request.POST)
+        formset = forms.ToothFindingFormSet(request.POST)
+        if form.is_valid() and formset.is_valid():
+            record = form.save(commit=False)
+            record.doctor = request.user
+            record.save()
+            # 保存牙位 formset
+            instances = formset.save(commit=False)
+            for instance in instances:
+                instance.record = record
+                instance.save()
+            for obj in formset.deleted_objects:
+                obj.delete()
+            return redirect('doctor-records')
+    return render(request, 'hospital/doctor_create_record.html', {
+        'doctor': doctor, 'form': form, 'formset': formset
+    })
+
+
+@login_required(login_url='doctorlogin')
+@user_passes_test(is_doctor, login_url="doctorlogin")
+def doctor_update_record_view(request, pk):
+    from django.utils import timezone
+    doctor = models.Doctor.objects.get(user_id=request.user.id)
+    record = models.MedicalRecord.objects.get(id=pk)
+    form = forms.MedicalRecordForm(instance=record)
+    formset = forms.ToothFindingFormSet(instance=record)
+    if request.method == 'POST':
+        form = forms.MedicalRecordForm(request.POST, instance=record)
+        formset = forms.ToothFindingFormSet(request.POST, instance=record)
+        if form.is_valid() and formset.is_valid():
+            r = form.save(commit=False)
+            # 首次确认时记录时间
+            if r.doctor_confirmed and not record.doctor_confirmed:
+                r.confirmed_at = timezone.now()
+            r.save()
+            formset.save()
+            return redirect('doctor-records')
+    return render(request, 'hospital/doctor_update_record.html', {
+        'doctor': doctor, 'form': form, 'formset': formset, 'record': record
+    })
 
 
 #Developed By : sumit kumar

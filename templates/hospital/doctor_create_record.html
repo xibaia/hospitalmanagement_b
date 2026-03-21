@@ -1,0 +1,175 @@
+{% extends 'hospital/doctor_base.html' %}
+{% load widget_tweaks %}
+{% block content %}
+<br><br><br>
+<div class="container">
+  <form method="post">
+    {% csrf_token %}
+
+    <!-- 基本信息 -->
+    <div class="card mb-3">
+      <div class="card-header text-white" style="background:#337AB7;"><strong>基本信息</strong></div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-4 form-group">
+            <label>患者</label>
+            {% render_field form.patient class="form-control" %}
+          </div>
+          <div class="col-md-4 form-group">
+            <label>就诊类型</label>
+            {% render_field form.visit_type class="form-control" %}
+          </div>
+          <div class="col-md-4 form-group">
+            <label>就诊日期</label>
+            {% render_field form.check_date class="form-control" %}
+          </div>
+          <div class="col-md-6 form-group">
+            <label>所属活动（可选）</label>
+            {% render_field form.activity class="form-control" %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 问诊记录 -->
+    <div class="card mb-3">
+      <div class="card-header text-white" style="background:#5bc995;"><strong>问诊记录</strong></div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-6 form-group">
+            <label>{{ form.chief_complaint.label }}</label>
+            {% render_field form.chief_complaint class="form-control" %}
+          </div>
+          <div class="col-md-6 form-group">
+            <label>{{ form.present_illness.label }}</label>
+            {% render_field form.present_illness class="form-control" %}
+          </div>
+          <div class="col-md-6 form-group">
+            <label>{{ form.past_history_note.label }}</label>
+            {% render_field form.past_history_note class="form-control" %}
+          </div>
+          <div class="col-md-6 form-group">
+            <label>{{ form.auxiliary_exam.label }}</label>
+            {% render_field form.auxiliary_exam class="form-control" %}
+          </div>
+          <div class="col-md-6 form-group">
+            <label>{{ form.treatment_plan.label }}</label>
+            {% render_field form.treatment_plan class="form-control" %}
+          </div>
+          <div class="col-md-6 form-group">
+            <label>{{ form.informed_consent.label }}</label>
+            {% render_field form.informed_consent class="form-control" %}
+          </div>
+          <div class="col-md-6 form-group">
+            <label>{{ form.treatment_record.label }}</label>
+            {% render_field form.treatment_record class="form-control" %}
+          </div>
+          <div class="col-md-6 form-group">
+            <label>{{ form.followup_notes.label }}</label>
+            {% render_field form.followup_notes class="form-control" %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 口腔检查 -->
+    <div class="card mb-3">
+      <div class="card-header text-white" style="background:#FC8213;"><strong>口腔检查</strong></div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-3 form-group">
+            <label>{{ form.face_symmetry.label }}</label>
+            {% render_field form.face_symmetry class="form-control" %}
+          </div>
+          <div class="col-md-3 form-group">
+            <label>{{ form.has_swelling.label }}</label>
+            {% render_field form.has_swelling class="form-control" %}
+          </div>
+          <div class="col-md-3 form-group">
+            <label>{{ form.mouth_opening.label }}</label>
+            {% render_field form.mouth_opening class="form-control" %}
+          </div>
+          <div class="col-md-3 form-group">
+            <label>{{ form.has_periodontal.label }}</label>
+            {% render_field form.has_periodontal class="form-control" %}
+          </div>
+          <div class="col-md-3 form-group">
+            <label>{{ form.mucosa_normal.label }}</label>
+            {% render_field form.mucosa_normal class="form-control" %}
+          </div>
+          <div class="col-md-4 form-group">
+            <label>{{ form.extraoral_note.label }}</label>
+            {% render_field form.extraoral_note class="form-control" %}
+          </div>
+          <div class="col-md-4 form-group">
+            <label>{{ form.mucosa_note.label }}</label>
+            {% render_field form.mucosa_note class="form-control" %}
+          </div>
+          <div class="col-md-4 form-group">
+            <label>{{ form.intraoral_note.label }}</label>
+            {% render_field form.intraoral_note class="form-control" %}
+          </div>
+          <div class="col-md-12 form-group">
+            <label>{{ form.diagnosis.label }}</label>
+            {% render_field form.diagnosis class="form-control" %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 牙位检查 Formset -->
+    <div class="card mb-3">
+      <div class="card-header text-white" style="background:#c0392b;"><strong>牙位检查记录（FDI编码）</strong></div>
+      <div class="card-body">
+        {{ formset.management_form }}
+        <table class="table table-bordered" id="toothTable">
+          <thead>
+            <tr><th>牙位号(FDI)</th><th>问题类型</th><th>备注</th><th>删除</th></tr>
+          </thead>
+          <tbody>
+            {% for tf in formset %}
+            <tr class="toothRow">
+              <td>{% render_field tf.tooth_number class="form-control" %}</td>
+              <td>{% render_field tf.finding_type class="form-control" %}</td>
+              <td>{% render_field tf.note class="form-control" %}</td>
+              <td>{% render_field tf.DELETE %}</td>
+            </tr>
+            {% endfor %}
+            <!-- Django empty_form 模板行，JS 用来克隆新行 -->
+            <tr id="emptyToothRow" style="display:none">
+              <td>{% render_field formset.empty_form.tooth_number class="form-control" %}</td>
+              <td>{% render_field formset.empty_form.finding_type class="form-control" %}</td>
+              <td>{% render_field formset.empty_form.note class="form-control" %}</td>
+              <td>{% render_field formset.empty_form.DELETE %}</td>
+            </tr>
+          </tbody>
+        </table>
+        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="addToothRow()">+ 添加牙位</button>
+      </div>
+    </div>
+
+    <button type="submit" class="btn btn-primary btn-lg">保存病历</button>
+    <a href="{% url 'doctor-records' %}" class="btn btn-secondary btn-lg">取消</a>
+  </form>
+</div>
+
+<script>
+var toothPrefix = '{{ formset.prefix }}';
+
+function addToothRow() {
+  var tbody = document.querySelector('#toothTable tbody');
+  var totalInput = document.getElementById('id_' + toothPrefix + '-TOTAL_FORMS');
+  var idx = parseInt(totalInput.value);
+
+  // 克隆 empty_form 模板行，将 __prefix__ 替换为当前索引
+  var template = document.getElementById('emptyToothRow');
+  var newRow = template.cloneNode(true);
+  newRow.removeAttribute('id');
+  newRow.style.display = '';
+  newRow.innerHTML = newRow.innerHTML.replace(/__prefix__/g, idx);
+
+  tbody.insertBefore(newRow, template); // 插在模板行之前
+  totalInput.value = idx + 1;
+}
+</script>
+{% endblock content %}

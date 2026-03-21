@@ -1,0 +1,30 @@
+{% extends 'hospital/admin_base.html' %}
+{% load widget_tweaks %}
+{% block content %}
+<br><br><br>
+<div class="container">
+  <div class="row justify-content-center">
+    <div class="col-md-7">
+      <div class="card">
+        <div class="card-header text-white" style="background:#337AB7;">
+          <h5 class="mb-0">编辑站点：{{ station.name }}</h5>
+        </div>
+        <div class="card-body">
+          <form method="post">
+            {% csrf_token %}
+            {% for field in form %}
+            <div class="form-group">
+              <label>{{ field.label }}</label>
+              {% render_field field class="form-control" %}
+              {% if field.errors %}<small class="text-danger">{{ field.errors.0 }}</small>{% endif %}
+            </div>
+            {% endfor %}
+            <button type="submit" class="btn btn-primary">更新</button>
+            <a href="{% url 'admin-station' %}" class="btn btn-secondary">取消</a>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock content %}

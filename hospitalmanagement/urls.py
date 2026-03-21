@@ -113,6 +113,40 @@ urlpatterns +=[
 
 ]
 
+# -------- 义诊活动 Activity --------
+urlpatterns += [
+    path('admin-activity', views.admin_activity_view, name='admin-activity'),
+    path('admin-add-activity', views.admin_add_activity_view, name='admin-add-activity'),
+    path('admin-view-activity/<int:pk>', views.admin_view_activity_view, name='admin-view-activity'),
+    path('update-activity/<int:pk>', views.update_activity_view, name='update-activity'),
+    path('delete-activity/<int:pk>', views.delete_activity_view, name='delete-activity'),
+]
+
+# -------- 志愿者 Volunteer --------
+urlpatterns += [
+    path('admin-volunteer', views.admin_volunteer_view, name='admin-volunteer'),
+    path('admin-add-volunteer', views.admin_add_volunteer_view, name='admin-add-volunteer'),
+    path('approve-volunteer/<int:pk>', views.approve_volunteer_view, name='approve-volunteer'),
+    path('reject-volunteer/<int:pk>', views.reject_volunteer_view, name='reject-volunteer'),
+]
+
+# -------- 站点 Station --------
+urlpatterns += [
+    path('admin-station', views.admin_station_view, name='admin-station'),
+    path('admin-add-station', views.admin_add_station_view, name='admin-add-station'),
+    path('update-station/<int:pk>', views.update_station_view, name='update-station'),
+    path('delete-station/<int:pk>', views.delete_station_view, name='delete-station'),
+]
+
+# -------- 病历 Medical Records --------
+urlpatterns += [
+    path('admin-medical-records', views.admin_medical_records_view, name='admin-medical-records'),
+    path('admin-view-record/<int:pk>', views.admin_view_record_view, name='admin-view-record'),
+    path('doctor-records', views.doctor_records_view, name='doctor-records'),
+    path('doctor-create-record', views.doctor_create_record_view, name='doctor-create-record'),
+    path('doctor-update-record/<int:pk>', views.doctor_update_record_view, name='doctor-update-record'),
+]
+
 # API路由
 urlpatterns += [
     path('api/', include('hospital.api_urls')),

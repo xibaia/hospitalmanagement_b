@@ -179,6 +179,63 @@
     </div>
     <div class="clearfix"> </div>
   </div>
+
+  <!-- 新增：义诊活动 / 志愿者 / 站点 / 病历 -->
+  <div class="market-updates" style="margin-top:10px;">
+    <div class="col-md-3 market-update-gd">
+      <div class="market-update-block" style="background:#27ae60;box-shadow:0 2px 5px rgba(0,0,0,.16);transition:.5s;">
+        <div class="col-md-8 market-update-left">
+          <h3>{{activitycount}}</h3>
+          <h4>义诊活动</h4>
+          <p><a href="/admin-activity" style="color:#fff;text-decoration:underline;">查看管理</a></p>
+        </div>
+        <div class="col-md-4 market-update-right">
+          <i class="fa fa-calendar" style="font-size:3em;color:#27ae60;width:80px;height:80px;background:#fff;text-align:center;border-radius:49px;line-height:1.7em;"></i>
+        </div>
+        <div class="clearfix"></div>
+      </div>
+    </div>
+    <div class="col-md-3 market-update-gd">
+      <div class="market-update-block" style="background:#8e44ad;box-shadow:0 2px 5px rgba(0,0,0,.16);transition:.5s;">
+        <div class="col-md-8 market-update-left">
+          <h3>{{volunteercount}}</h3>
+          <h4>志愿者</h4>
+          <p>待审批：{{pendingvolunteercount}}</p>
+        </div>
+        <div class="col-md-4 market-update-right">
+          <i class="fa fa-users" style="font-size:3em;color:#8e44ad;width:80px;height:80px;background:#fff;text-align:center;border-radius:49px;line-height:1.7em;"></i>
+        </div>
+        <div class="clearfix"></div>
+      </div>
+    </div>
+    <div class="col-md-3 market-update-gd">
+      <div class="market-update-block" style="background:#2980b9;box-shadow:0 2px 5px rgba(0,0,0,.16);transition:.5s;">
+        <div class="col-md-8 market-update-left">
+          <h3>{{stationcount}}</h3>
+          <h4>活跃站点</h4>
+          <p><a href="/admin-station" style="color:#fff;text-decoration:underline;">查看管理</a></p>
+        </div>
+        <div class="col-md-4 market-update-right">
+          <i class="fa fa-map-marker" style="font-size:3em;color:#2980b9;width:80px;height:80px;background:#fff;text-align:center;border-radius:49px;line-height:1.7em;"></i>
+        </div>
+        <div class="clearfix"></div>
+      </div>
+    </div>
+    <div class="col-md-3 market-update-gd">
+      <div class="market-update-block" style="background:#c0392b;box-shadow:0 2px 5px rgba(0,0,0,.16);transition:.5s;">
+        <div class="col-md-8 market-update-left">
+          <h3>{{recordcount}}</h3>
+          <h4>病历总数</h4>
+          <p><a href="/admin-medical-records" style="color:#fff;text-decoration:underline;">查看病历</a></p>
+        </div>
+        <div class="col-md-4 market-update-right">
+          <i class="fa fa-file-text" style="font-size:3em;color:#c0392b;width:80px;height:80px;background:#fff;text-align:center;border-radius:49px;line-height:1.7em;"></i>
+        </div>
+        <div class="clearfix"></div>
+      </div>
+    </div>
+    <div class="clearfix"></div>
+  </div>
 </body>
 <!--
   developed By : sumit kumar

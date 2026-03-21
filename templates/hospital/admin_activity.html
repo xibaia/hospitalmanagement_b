@@ -1,0 +1,49 @@
+{% extends 'hospital/admin_base.html' %}
+{% block content %}
+<br><br><br>
+<div class="container">
+  <div class="panel panel-primary">
+    <div class="panel-heading" style="display:flex;justify-content:space-between;align-items:center;padding:10px 15px;">
+      <h6 class="panel-title" style="margin:0;">义诊活动列表</h6>
+      <a href="{% url 'admin-add-activity' %}" class="btn btn-success btn-sm">+ 新增活动</a>
+    </div>
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th>活动名称</th>
+          <th>地点</th>
+          <th>开始时间</th>
+          <th>结束时间</th>
+          <th>负责人</th>
+          <th>状态</th>
+          <th>操作</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for a in activities %}
+        <tr>
+          <td>{{ a.name }}</td>
+          <td>{{ a.location }}</td>
+          <td>{{ a.start_time|date:"Y-m-d H:i" }}</td>
+          <td>{{ a.end_time|date:"Y-m-d H:i" }}</td>
+          <td>{{ a.leader.get_full_name|default:a.leader.username }}</td>
+          <td>
+            {% if a.status == 'active' %}<span class="label label-success">进行中</span>
+            {% elif a.status == 'draft' %}<span class="label label-default">草稿</span>
+            {% elif a.status == 'ended' %}<span class="label label-warning">已结束</span>
+            {% else %}<span class="label label-danger">已取消</span>{% endif %}
+          </td>
+          <td>
+            <a href="{% url 'admin-view-activity' a.id %}" class="btn btn-info btn-xs">详情</a>
+            <a href="{% url 'update-activity' a.id %}" class="btn btn-primary btn-xs">编辑</a>
+            <a href="{% url 'delete-activity' a.id %}" class="btn btn-danger btn-xs" onclick="return confirm('确认删除？')">删除</a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="7" class="text-center text-muted">暂无活动</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock content %}

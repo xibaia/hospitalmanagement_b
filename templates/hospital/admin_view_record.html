@@ -1,0 +1,80 @@
+{% extends 'hospital/admin_base.html' %}
+{% block content %}
+<br><br><br>
+<div class="container">
+  <div class="row">
+    <!-- 左列：基本信息 + 口腔检查 -->
+    <div class="col-md-7">
+      <div class="panel panel-primary">
+        <div class="panel-heading"><h6 class="panel-title">病历 · {{ record.visit_no }}</h6></div>
+        <div class="panel-body" style="padding:15px;">
+          <table class="table table-bordered table-sm">
+            <tr><th width="120">患者</th><td>{{ record.patient.get_name }}</td><th>就诊日期</th><td>{{ record.check_date }}</td></tr>
+            <tr><th>就诊类型</th><td>{{ record.get_visit_type_display }}</td><th>医生</th><td>{{ record.doctor.get_full_name|default:"—" }}</td></tr>
+            <tr><th>所属活动</th><td colspan="3">{{ record.activity.name|default:"—" }}</td></tr>
+          </table>
+
+          <h6 class="mt-3"><strong>问诊记录</strong></h6>
+          <table class="table table-bordered table-sm">
+            <tr><th>主诉</th><td>{{ record.chief_complaint|linebreaksbr|default:"—" }}</td></tr>
+            <tr><th>现病史</th><td>{{ record.present_illness|linebreaksbr|default:"—" }}</td></tr>
+            <tr><th>既往史</th><td>{{ record.past_history_note|linebreaksbr|default:"—" }}</td></tr>
+            <tr><th>辅助检查</th><td>{{ record.auxiliary_exam|linebreaksbr|default:"—" }}</td></tr>
+            <tr><th>治疗计划</th><td>{{ record.treatment_plan|linebreaksbr|default:"—" }}</td></tr>
+            <tr><th>治疗记录</th><td>{{ record.treatment_record|linebreaksbr|default:"—" }}</td></tr>
+            <tr><th>复诊备注</th><td>{{ record.followup_notes|linebreaksbr|default:"—" }}</td></tr>
+          </table>
+
+          <h6 class="mt-3"><strong>口腔检查</strong></h6>
+          <table class="table table-bordered table-sm">
+            <tr><th>面部对称</th><td>{{ record.face_symmetry|yesno:"是,否" }}</td><th>肿胀</th><td>{{ record.has_swelling|yesno:"有,无" }}</td></tr>
+            <tr><th>开口度</th><td>{{ record.get_mouth_opening_display }}</td><th>牙周问题</th><td>{{ record.has_periodontal|yesno:"有,无" }}</td></tr>
+            <tr><th>黏膜正常</th><td>{{ record.mucosa_normal|yesno:"是,否" }}</td><th>综合诊断</th><td>{{ record.diagnosis|default:"—" }}</td></tr>
+            <tr><th>口外备注</th><td colspan="3">{{ record.extraoral_note|default:"—" }}</td></tr>
+            <tr><th>口内备注</th><td colspan="3">{{ record.intraoral_note|default:"—" }}</td></tr>
+          </table>
+
+          <p class="text-muted" style="font-size:0.85em;">
+            确认状态：{% if record.doctor_confirmed %}<span class="text-success">已确认（{{ record.confirmed_at|date:"Y-m-d H:i" }}）</span>{% else %}<span class="text-warning">未确认</span>{% endif %}
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 右列：牙位检查 + 病史 -->
+    <div class="col-md-5">
+      <!-- 牙位检查 -->
+      <div class="panel panel-primary">
+        <div class="panel-heading"><h6 class="panel-title">牙位检查（{{ findings|length }}条）</h6></div>
+        <table class="table table-hover table-sm">
+          <thead><tr><th>牙位(FDI)</th><th>问题类型</th><th>备注</th></tr></thead>
+          <tbody>
+            {% for f in findings %}
+            <tr><td>{{ f.tooth_number }}</td><td>{{ f.get_finding_type_display }}</td><td>{{ f.note|default:"—" }}</td></tr>
+            {% empty %}
+            <tr><td colspan="3" class="text-center text-muted">无牙位记录</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 既往病史 -->
+      {% if history %}
+      <div class="panel panel-info">
+        <div class="panel-heading"><h6 class="panel-title">既往病史</h6></div>
+        <div class="panel-body" style="padding:10px 15px;">
+          <table class="table table-sm">
+            <tr><th>高血压</th><td>{{ history.hypertension|yesno:"有,无" }}</td></tr>
+            <tr><th>心脏病</th><td>{{ history.heart_disease|yesno:"有,无" }}</td></tr>
+            <tr><th>高血糖</th><td>{{ history.hyperglycemia|yesno:"有,无" }}</td></tr>
+            <tr><th>低血糖</th><td>{{ history.hypoglycemia|yesno:"有,无" }}</td></tr>
+            <tr><th>凝血问题</th><td>{{ history.coagulation|yesno:"有,无" }}</td></tr>
+          </table>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+  <a href="{% url 'admin-medical-records' %}" class="btn btn-secondary">← 返回列表</a>
+</div>
+{% endblock content %}

@@ -1,0 +1,40 @@
+{% extends 'hospital/admin_base.html' %}
+{% load widget_tweaks %}
+{% block content %}
+<br><br><br>
+<div class="container">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="card">
+        <div class="card-header text-white" style="background:#337AB7;">
+          <h5 class="mb-0">新增志愿者</h5>
+        </div>
+        <div class="card-body">
+          <form method="post">
+            {% csrf_token %}
+            <h6 class="text-muted mb-3">账号信息</h6>
+            {% for field in userForm %}
+            <div class="form-group">
+              <label>{{ field.label }}</label>
+              {% render_field field class="form-control" %}
+              {% if field.errors %}<small class="text-danger">{{ field.errors.0 }}</small>{% endif %}
+            </div>
+            {% endfor %}
+            <hr>
+            <h6 class="text-muted mb-3">志愿者信息</h6>
+            {% for field in volunteerForm %}
+            <div class="form-group">
+              <label>{{ field.label }}</label>
+              {% render_field field class="form-control" %}
+              {% if field.errors %}<small class="text-danger">{{ field.errors.0 }}</small>{% endif %}
+            </div>
+            {% endfor %}
+            <button type="submit" class="btn btn-primary">保存</button>
+            <a href="{% url 'admin-volunteer' %}" class="btn btn-secondary">取消</a>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock content %}

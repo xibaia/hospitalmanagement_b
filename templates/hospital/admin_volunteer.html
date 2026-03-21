@@ -1,0 +1,58 @@
+{% extends 'hospital/admin_base.html' %}
+{% block content %}
+<br><br><br>
+<div class="container">
+
+  <!-- 待审批 -->
+  {% if pending %}
+  <div class="panel panel-warning">
+    <div class="panel-heading"><h6 class="panel-title">待审批志愿者（{{ pending|length }}）</h6></div>
+    <table class="table table-hover">
+      <thead>
+        <tr><th>真实姓名</th><th>账号</th><th>手机号</th><th>申请时间</th><th>操作</th></tr>
+      </thead>
+      <tbody>
+        {% for v in pending %}
+        <tr>
+          <td>{{ v.real_name }}</td>
+          <td>{{ v.user.username }}</td>
+          <td>{{ v.mobile }}</td>
+          <td>{{ v.joined_date }}</td>
+          <td>
+            <a href="{% url 'approve-volunteer' v.id %}" class="btn btn-success btn-xs">通过</a>
+            <a href="{% url 'reject-volunteer' v.id %}" class="btn btn-danger btn-xs" onclick="return confirm('拒绝并删除账号？')">拒绝</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+
+  <!-- 已审批 -->
+  <div class="panel panel-primary">
+    <div class="panel-heading" style="display:flex;justify-content:space-between;align-items:center;padding:10px 15px;">
+      <h6 class="panel-title" style="margin:0;">志愿者列表</h6>
+      <a href="{% url 'admin-add-volunteer' %}" class="btn btn-success btn-sm">+ 新增志愿者</a>
+    </div>
+    <table class="table table-hover">
+      <thead>
+        <tr><th>真实姓名</th><th>账号</th><th>手机号</th><th>加入日期</th></tr>
+      </thead>
+      <tbody>
+        {% for v in volunteers %}
+        <tr>
+          <td>{{ v.real_name }}</td>
+          <td>{{ v.user.username }}</td>
+          <td>{{ v.mobile }}</td>
+          <td>{{ v.joined_date }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="4" class="text-center text-muted">暂无志愿者</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+</div>
+{% endblock content %}

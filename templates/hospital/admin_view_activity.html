@@ -1,0 +1,51 @@
+{% extends 'hospital/admin_base.html' %}
+{% block content %}
+<br><br><br>
+<div class="container">
+  <div class="row">
+    <!-- 活动基本信息 -->
+    <div class="col-md-5">
+      <div class="panel panel-primary">
+        <div class="panel-heading"><h6 class="panel-title">活动详情</h6></div>
+        <div class="panel-body" style="padding:15px;">
+          <table class="table table-bordered">
+            <tr><th>活动名称</th><td>{{ activity.name }}</td></tr>
+            <tr><th>地点</th><td>{{ activity.location }}</td></tr>
+            <tr><th>开始时间</th><td>{{ activity.start_time|date:"Y-m-d H:i" }}</td></tr>
+            <tr><th>结束时间</th><td>{{ activity.end_time|date:"Y-m-d H:i" }}</td></tr>
+            <tr><th>负责人</th><td>{{ activity.leader.get_full_name|default:activity.leader.username }}</td></tr>
+            <tr><th>状态</th><td>{{ activity.get_status_display }}</td></tr>
+            <tr><th>描述</th><td>{{ activity.description|linebreaksbr }}</td></tr>
+          </table>
+          <a href="{% url 'update-activity' activity.id %}" class="btn btn-primary btn-sm">编辑</a>
+          <a href="{% url 'admin-activity' %}" class="btn btn-secondary btn-sm">返回列表</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- 参与者列表 -->
+    <div class="col-md-7">
+      <div class="panel panel-primary">
+        <div class="panel-heading"><h6 class="panel-title">参与人员（{{ participants|length }}人）</h6></div>
+        <table class="table table-hover">
+          <thead>
+            <tr><th>姓名</th><th>账号</th><th>角色</th><th>加入时间</th></tr>
+          </thead>
+          <tbody>
+            {% for p in participants %}
+            <tr>
+              <td>{{ p.user.get_full_name|default:p.user.username }}</td>
+              <td>{{ p.user.username }}</td>
+              <td>{{ p.get_role_display }}</td>
+              <td>{{ p.joined_at|date:"Y-m-d" }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="4" class="text-center text-muted">暂无参与人员</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock content %}

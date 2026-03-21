@@ -1,0 +1,44 @@
+{% extends 'hospital/admin_base.html' %}
+{% block content %}
+<br><br><br>
+<div class="container">
+  <div class="panel panel-primary">
+    <div class="panel-heading"><h6 class="panel-title">病历列表（共 {{ records|length }} 条）</h6></div>
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th>就诊流水号</th>
+          <th>患者</th>
+          <th>就诊日期</th>
+          <th>就诊类型</th>
+          <th>医生</th>
+          <th>主诉</th>
+          <th>已确认</th>
+          <th>操作</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in records %}
+        <tr>
+          <td>{{ r.visit_no }}</td>
+          <td>{{ r.patient.get_name }}</td>
+          <td>{{ r.check_date }}</td>
+          <td>{{ r.get_visit_type_display }}</td>
+          <td>{{ r.doctor.get_full_name|default:r.doctor.username|default:"—" }}</td>
+          <td>{{ r.chief_complaint|truncatechars:30|default:"—" }}</td>
+          <td>
+            {% if r.doctor_confirmed %}<span class="label label-success">是</span>
+            {% else %}<span class="label label-default">否</span>{% endif %}
+          </td>
+          <td>
+            <a href="{% url 'admin-view-record' r.id %}" class="btn btn-info btn-xs">详情</a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="8" class="text-center text-muted">暂无病历</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock content %}

@@ -1,7 +1,7 @@
 # 新模型管理界面开发计划
 
 > 创建时间：2026-03-21
-> 状态：待执行
+> 状态：Phase 1-6 已完成（2026-03-21）
 
 ---
 
@@ -17,27 +17,27 @@
 
 | 模块 | 页面 | URL | 状态 |
 |------|------|-----|------|
-| 义诊活动 | 列表 | `/admin-activity` | ⬜ 未开始 |
-| | 新增 | `/admin-add-activity` | ⬜ 未开始 |
-| | 编辑 | `/update-activity/<pk>` | ⬜ 未开始 |
-| | 详情（含参与者列表） | `/admin-view-activity/<pk>` | ⬜ 未开始 |
-| 志愿者 | 列表 + 待审批 | `/admin-volunteer` | ⬜ 未开始 |
-| | 新增 | `/admin-add-volunteer` | ⬜ 未开始 |
-| | 审批 | `/approve-volunteer/<pk>` | ⬜ 未开始 |
-| | 拒绝 | `/reject-volunteer/<pk>` | ⬜ 未开始 |
-| 站点 | 列表 | `/admin-station` | ⬜ 未开始 |
-| | 新增 | `/admin-add-station` | ⬜ 未开始 |
-| | 编辑 | `/update-station/<pk>` | ⬜ 未开始 |
-| 病历 | 列表（只读） | `/admin-medical-records` | ⬜ 未开始 |
-| | 详情（只读） | `/admin-view-record/<pk>` | ⬜ 未开始 |
+| 义诊活动 | 列表 | `/admin-activity` | ✅ 已完成 |
+| | 新增 | `/admin-add-activity` | ✅ 已完成 |
+| | 编辑 | `/update-activity/<pk>` | ✅ 已完成 |
+| | 详情（含参与者列表） | `/admin-view-activity/<pk>` | ✅ 已完成 |
+| 志愿者 | 列表 + 待审批 | `/admin-volunteer` | ✅ 已完成 |
+| | 新增 | `/admin-add-volunteer` | ✅ 已完成 |
+| | 审批 | `/approve-volunteer/<pk>` | ✅ 已完成 |
+| | 拒绝 | `/reject-volunteer/<pk>` | ✅ 已完成 |
+| 站点 | 列表 | `/admin-station` | ✅ 已完成 |
+| | 新增 | `/admin-add-station` | ✅ 已完成 |
+| | 编辑 | `/update-station/<pk>` | ✅ 已完成 |
+| 病历 | 列表（只读） | `/admin-medical-records` | ✅ 已完成 |
+| | 详情（只读） | `/admin-view-record/<pk>` | ✅ 已完成 |
 
 ### 医生侧（Doctor Dashboard 扩展）
 
 | 模块 | 页面 | URL | 状态 |
 |------|------|-----|------|
-| 病历 | 我的病历列表 | `/doctor-records` | ⬜ 未开始 |
-| | 新建病历（含牙位内联） | `/doctor-create-record` | ⬜ 未开始 |
-| | 编辑 / 确认病历 | `/doctor-update-record/<pk>` | ⬜ 未开始 |
+| 病历 | 我的病历列表 | `/doctor-records` | ✅ 已完成 |
+| | 新建病历（含牙位内联） | `/doctor-create-record` | ✅ 已完成 |
+| | 编辑 / 确认病历 | `/doctor-update-record/<pk>` | ✅ 已完成 |
 
 > **说明**
 > - `ToothFinding` 作为 formset 内联在病历编辑页，不单独做页面
@@ -67,12 +67,12 @@ doctor-dashboard
 
 | 阶段 | 内容 | 状态 |
 |------|------|------|
-| Phase 1 | 义诊活动管理（Activity + ActivityParticipant） | ⬜ 未开始 |
-| Phase 2 | 志愿者管理（Volunteer） | ⬜ 未开始 |
-| Phase 3 | 站点管理（Station） | ⬜ 未开始 |
-| Phase 4 | 病历管理（MedicalRecord + ToothFinding formset） | ⬜ 未开始 |
-| Phase 5 | 患者病史内联（MedicalHistory，扩展现有患者详情页） | ⬜ 未开始 |
-| Phase 6 | Dashboard 入口卡片更新 | ⬜ 未开始 |
+| Phase 1 | 义诊活动管理（Activity + ActivityParticipant） | ✅ 已完成 |
+| Phase 2 | 志愿者管理（Volunteer） | ✅ 已完成 |
+| Phase 3 | 站点管理（Station） | ✅ 已完成 |
+| Phase 4 | 病历管理（MedicalRecord + ToothFinding formset） | ✅ 已完成 |
+| Phase 5 | 患者病史内联（MedicalHistory，扩展现有患者详情页） | ✅ 已完成 |
+| Phase 6 | Dashboard 入口卡片更新 | ✅ 已完成 |
 
 ---
 
