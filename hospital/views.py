@@ -1141,3 +1141,54 @@ def doctor_update_record_view(request, pk):
 
 #Developed By : sumit kumar
 #facebook : fb.com/sumit.luv
+
+
+# =========================================================================
+# ===================== 病历 MEDICAL RECORD VIEWS (Patient) ================
+# =========================================================================
+
+@login_required(login_url='patientlogin')
+@user_passes_test(is_patient, login_url="patientlogin")
+def patient_records_view(request):
+    """患者查看自己的病历列表"""
+    patient = models.Patient.objects.get(user=request.user)
+    records = models.MedicalRecord.objects.filter(patient=patient).order_by('-check_date', '-created_at')
+    return render(request, 'hospital/patient_records.html', {
+        'patient': patient, 'records': records
+    })
+
+
+@login_required(login_url='patientlogin')
+@user_passes_test(is_patient, login_url="patientlogin")
+def patient_view_record_view(request, pk):
+    """患者查看单个病历详情"""
+    patient = models.Patient.objects.get(user=request.user)
+    record = models.MedicalRecord.objects.get(id=pk, patient=patient)
+    findings = models.ToothFinding.objects.filter(record=record)
+
+    # 获取医生名称
+    doctor_name = None
+    if record.doctor:
+        try:
+            doctor = models.Doctor.objects.get(user=record.doctor)
+            doctor_name = doctor.get_name
+        except models.Doctor.DoesNotExist:
+            doctor_name = record.doctor.get_full_name() or record.doctor.username
+
+    # 构建牙位查找字典，键为牙位号，值为finding对象
+    findings_dict = {}
+    for finding in findings:
+        findings_dict[finding.tooth_number] = finding
+
+    return render(request, 'hospital/patient_view_record.html', {
+        'patient': patient,
+        'record': record,
+        'findings': findings,
+        'doctor_name': doctor_name,
+        'findings_dict': findings_dict,
+        # FDI 牙位编号
+        'upper_right': [11, 12, 13, 14, 15, 16, 17, 18],
+        'upper_left': [21, 22, 23, 24, 25, 26, 27, 28],
+        'lower_left': [31, 32, 33, 34, 35, 36, 37, 38],
+        'lower_right': [41, 42, 43, 44, 45, 46, 47, 48],
+    })

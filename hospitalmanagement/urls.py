@@ -145,6 +145,9 @@ urlpatterns += [
     path('doctor-records', views.doctor_records_view, name='doctor-records'),
     path('doctor-create-record', views.doctor_create_record_view, name='doctor-create-record'),
     path('doctor-update-record/<int:pk>', views.doctor_update_record_view, name='doctor-update-record'),
+    # 患者端病历查看
+    path('patient-records', views.patient_records_view, name='patient-records'),
+    path('patient-view-record/<int:pk>', views.patient_view_record_view, name='patient-view-record'),
 ]
 
 # API路由
