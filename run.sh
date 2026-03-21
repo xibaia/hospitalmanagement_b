@@ -7,12 +7,18 @@ then
     exit
 fi
 
+# 激活虚拟环境
+if [ -d "venv" ]; then
+    echo "正在激活虚拟环境..."
+    source venv/bin/activate 2>/dev/null || source venv/Scripts/activate 2>/dev/null
+fi
+
 echo "正在安装依赖..."
-pip3 install -r requirement.txt
+pip install -r requirement.txt
 
 echo "正在应用数据库迁移..."
-python3 manage.py makemigrations
-python3 manage.py migrate
+python manage.py makemigrations
+python manage.py migrate
 
 echo "正在启动服务器..."
-python3 manage.py runserver 0.0.0.0:8000
+python manage.py runserver 0.0.0.0:8000
