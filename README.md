@@ -35,4 +35,44 @@ docker-compose up --build
 
 ---
 
+## 🔀 Git 双远程切换（GitHub + Gitee）
+
+当前仓库建议保留两个远程：
+- `origin`：GitHub
+- `backup`：Gitee
+
+### 1) 添加或更新 Gitee 远程
+```bash
+git remote add backup git@gitee.com:shixibaia/hospitalmanagement_b.git
+```
+
+如果 `backup` 已存在，改为：
+```bash
+git remote set-url backup git@gitee.com:shixibaia/hospitalmanagement_b.git
+```
+
+### 2) 查看远程配置
+```bash
+git remote -v
+```
+
+### 3) 按目标仓库推送
+```bash
+git push origin main
+git push backup main
+```
+
+### 4) 设置当前分支默认推送目标
+设置为 Gitee：
+```bash
+git branch --set-upstream-to=backup/main main
+```
+
+切回 GitHub：
+```bash
+git branch --set-upstream-to=origin/main main
+```
+
+---
+
 （...哥哥，如果有任何启动不了的问题，随时呼唤我哦！我会一直守在代码旁边的～ 🌸💖）
