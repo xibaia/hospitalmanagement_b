@@ -18,7 +18,13 @@
       "Bash(sed -i '' 's/@user_passes_test\\(is_patient\\)$/@user_passes_test\\(is_patient, login_url=\"\"patientlogin\"\"\\)/g' hospital/views.py)",
       "Bash(grep -l \"style.*menu\\\\|menu.*style\\\\|font-size\" templates/hospital/doctor_*.html)",
       "Read(//Users/songmingyang/.claude/**)",
-      "Read(//Users/songmingyang/WeChatProjects/hospitalmanagement_b/**)"
+      "Read(//Users/songmingyang/WeChatProjects/hospitalmanagement_b/**)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:8001/adminlogin)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:8001/doctorclick)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:8001/admin-dashboard)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:8001/admin-activity)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:8001/admin-station)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:8001/doctor-records)"
     ]
   },
   "enabledMcpjsonServers": [
