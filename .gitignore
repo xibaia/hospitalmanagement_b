@@ -77,6 +77,8 @@ celerybeat-schedule.*
 
 # Environments
 .env
+# 保留模板，忽略实际配置
+!.env.example
 .venv
 env/
 venv/

@@ -29,9 +29,46 @@ docker-compose up --build
 - **病人端**：在线预约，查看病历，下载账单。
 - **API 支持**：内置 REST API 接口，方便二次开发。
 
-## ⚙️ 二次开发建议
-- **数据库**：目前默认使用 SQLite。生产环境建议切换至 PostgreSQL 或 MySQL。
-- **Python 版本**：推荐使用 Python 3.9+。
+## ⚙️ 环境配置
+
+### 快速开始
+
+```bash
+cp .env.example .env   # 复制配置模板
+pip install -r requirement.txt
+python manage.py migrate
+python manage.py runserver
+```
+
+### 环境变量（`.env`）
+
+| 变量 | 默认值 | 说明 |
+|------|--------|------|
+| `DJANGO_ENV` | `development` | `development` 用 SQLite，`production` 用 PostgreSQL |
+| `SECRET_KEY` | 内置默认值 | 生产环境必须修改 |
+| `DEBUG` | `True` | 生产环境设为 `False` |
+| `ALLOWED_HOSTS` | `localhost,127.0.0.1` | 生产环境填服务器域名/IP |
+| `DB_NAME` | `oral_screening` | PostgreSQL 数据库名 |
+| `DB_USER` | `postgres` | PostgreSQL 用户名 |
+| `DB_PASSWORD` | _(空)_ | PostgreSQL 密码 |
+| `DB_HOST` | `localhost` | PostgreSQL 主机 |
+| `DB_PORT` | `5432` | PostgreSQL 端口 |
+
+### 数据库策略
+
+- **开发环境**：自动使用 SQLite，无需任何配置
+- **生产环境**：需安装 PostgreSQL，并在 `.env` 中设置：
+
+```bash
+DJANGO_ENV=production
+DB_NAME=oral_screening
+DB_USER=postgres
+DB_PASSWORD=your-password
+DB_HOST=localhost
+```
+
+### Python 版本
+推荐 Python 3.9+。
 
 ---
 

@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__memory__search_nodes",
+      "Bash(pandoc --track-changes=all \"/Users/songmingyang/WeChatProjects/hospitalmanagement_b/口腔筛查登记小程序V1.1.150操作说明书.doc\" -o /tmp/manual.md)",
+      "Bash(soffice --headless --convert-to docx \"/Users/songmingyang/WeChatProjects/hospitalmanagement_b/口腔筛查登记小程序V1.1.150操作说明书.doc\" --outdir /tmp/)",
+      "Bash(/Applications/LibreOffice.app/Contents/MacOS/soffice --headless --convert-to docx \"/Users/songmingyang/WeChatProjects/hospitalmanagement_b/口腔筛查登记小程序V1.1.150操作说明书.doc\" --outdir /tmp/)",
+      "Bash(cp \"/Users/songmingyang/WeChatProjects/hospitalmanagement_b/口腔筛查登记小程序V1.1.150操作说明书.doc\" /tmp/manual.docx)",
+      "Bash(pandoc --track-changes=all /tmp/manual.docx -o /tmp/manual.md)",
+      "Bash(python3:*)",
+      "Bash(DJANGO_ENV=production DB_PASSWORD=test python3 manage.py check 2>&1)",
+      "Bash(DJANGO_ENV=production DB_PASSWORD=test python3 manage.py check --deploy 2>&1)"
+    ]
+  },
+  "enabledMcpjsonServers": [
+    "fetch",
+    "time"
+  ]
+}
