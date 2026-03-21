@@ -5,12 +5,16 @@ from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
 from django.contrib.auth import login
 from django.contrib.auth.models import User
-from .models import Patient, Doctor
+from .models import Patient, Doctor, MedicalRecord
 from .serializers import (
     PatientRegistrationSerializer,
     PatientLoginSerializer,
     PatientInfoSerializer,
-    DoctorListSerializer
+    DoctorListSerializer,
+    DoctorLoginSerializer,
+    DoctorInfoSerializer,
+    MedicalRecordListSerializer,
+    MedicalRecordDetailSerializer
 )
 
 
@@ -387,5 +391,203 @@ def bind_doctor_api(request):
         return Response({
             'success': False,
             'message': f'绑定失败: {str(e)}',
+            'data': None
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+# ==================== 医生登录 API ====================
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def doctor_login_api(request):
+    """
+    医生登录API
+
+    请求参数:
+    {
+        "username": "doctor1",
+        "password": "123456"
+    }
+
+    返回:
+    {
+        "success": true,
+        "message": "登录成功",
+        "data": {
+            "token": "9944b09199c62bcf9418ad846dd0e4bbdfc6ee4b",
+            "user_info": {
+                "user_id": 1,
+                "username": "doctor1",
+                "full_name": "李医生"
+            },
+            "doctor_info": {
+                "id": 1,
+                "mobile": "13900139000",
+                "department": "Cardiologist"
+            }
+        }
+    }
+    """
+    serializer = DoctorLoginSerializer(data=request.data)
+
+    if serializer.is_valid():
+        user = serializer.validated_data['user']
+
+        # 获取或创建token
+        token, created = Token.objects.get_or_create(user=user)
+
+        # 获取医生信息
+        try:
+            doctor = Doctor.objects.get(user=user)
+            doctor_serializer = DoctorInfoSerializer(doctor)
+
+            return Response({
+                'success': True,
+                'message': '登录成功',
+                'data': {
+                    'token': token.key,
+                    'user_info': {
+                        'user_id': user.id,
+                        'username': user.username,
+                        'full_name': doctor.get_name
+                    },
+                    'doctor_info': doctor_serializer.data
+                }
+            }, status=status.HTTP_200_OK)
+        except Doctor.DoesNotExist:
+            return Response({
+                'success': False,
+                'message': '医生信息不存在',
+                'data': None
+            }, status=status.HTTP_404_NOT_FOUND)
+
+    return Response({
+        'success': False,
+        'message': '登录失败',
+        'errors': serializer.errors
+    }, status=status.HTTP_400_BAD_REQUEST)
+
+
+# ==================== 病历查询 API ====================
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def patient_records_api(request):
+    """
+    获取当前患者的病历列表API
+
+    需要在请求头中包含: Authorization: Token xxx
+
+    返回:
+    {
+        "success": true,
+        "message": "获取成功",
+        "data": [
+            {
+                "id": 1,
+                "visit_no": "20240321001",
+                "check_date": "2024-03-21",
+                "visit_type": "charity",
+                "visit_type_display": "义诊",
+                "patient_name": "张三",
+                "doctor_name": "李医生",
+                "activity_name": "社区义诊活动",
+                "doctor_confirmed": true
+            }
+        ]
+    }
+    """
+    try:
+        # 获取当前患者
+        patient = Patient.objects.get(user=request.user)
+
+        # 获取该患者的所有病历
+        records = MedicalRecord.objects.filter(patient=patient).order_by('-check_date', '-created_at')
+
+        serializer = MedicalRecordListSerializer(records, many=True)
+
+        return Response({
+            'success': True,
+            'message': '获取成功',
+            'data': serializer.data
+        }, status=status.HTTP_200_OK)
+
+    except Patient.DoesNotExist:
+        return Response({
+            'success': False,
+            'message': '患者信息不存在',
+            'data': None
+        }, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({
+            'success': False,
+            'message': f'获取失败: {str(e)}',
+            'data': None
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def patient_record_detail_api(request, pk):
+    """
+    获取病历详情API
+
+    需要在请求头中包含: Authorization: Token xxx
+
+    URL参数: pk - 病历ID
+
+    返回:
+    {
+        "success": true,
+        "message": "获取成功",
+        "data": {
+            "id": 1,
+            "visit_no": "20240321001",
+            "check_date": "2024-03-21",
+            "visit_type": "charity",
+            "visit_type_display": "义诊",
+            "patient_name": "张三",
+            "doctor_name": "李医生",
+            "activity_name": "社区义诊活动",
+            "chief_complaint": "牙痛",
+            "diagnosis": "龋齿",
+            "tooth_findings": [
+                {"tooth_number": 16, "finding_type": "caries", "note": "深龋"}
+            ],
+            "doctor_confirmed": true
+        }
+    }
+    """
+    try:
+        # 获取当前患者
+        patient = Patient.objects.get(user=request.user)
+
+        # 获取指定病历（只能查看自己的）
+        record = MedicalRecord.objects.get(id=pk, patient=patient)
+
+        serializer = MedicalRecordDetailSerializer(record)
+
+        return Response({
+            'success': True,
+            'message': '获取成功',
+            'data': serializer.data
+        }, status=status.HTTP_200_OK)
+
+    except Patient.DoesNotExist:
+        return Response({
+            'success': False,
+            'message': '患者信息不存在',
+            'data': None
+        }, status=status.HTTP_404_NOT_FOUND)
+    except MedicalRecord.DoesNotExist:
+        return Response({
+            'success': False,
+            'message': '病历不存在或无权查看',
+            'data': None
+        }, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({
+            'success': False,
+            'message': f'获取失败: {str(e)}',
             'data': None
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
