@@ -1,49 +1,364 @@
 {% extends 'hospital/admin_base.html' %}
 {% block content %}
-<br><br><br>
-<div class="container">
-  <div class="panel panel-primary">
-    <div class="panel-heading" style="display:flex;justify-content:space-between;align-items:center;padding:10px 15px;">
-      <h6 class="panel-title" style="margin:0;">义诊活动列表</h6>
-      <a href="{% url 'admin-add-activity' %}" class="btn btn-success btn-sm">+ 新增活动</a>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@300;400;500&display=swap');
+
+:root {
+  --teal: #0d9488;
+  --teal2: #059669;
+  --amber: #f59e0b;
+  --amberLight: #fef3c7;
+  --slate: #64748b;
+  --slateLight: #f1f5f9;
+}
+
+.actPage {
+  font-family: 'DM Sans', sans-serif;
+  padding: 2rem 2rem 4rem;
+  background: #f8fafb;
+  min-height: 100vh;
+}
+
+.actHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 2rem;
+}
+
+.actTitle {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.9rem;
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1;
+  margin: 0;
+}
+
+.actTitle span { color: var(--teal); }
+
+.actSubtitle {
+  font-size: 0.85rem;
+  color: var(--slate);
+  margin-top: 0.3rem;
+  margin-bottom: 0;
+}
+
+.btnAdd {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: linear-gradient(135deg, var(--teal), var(--teal2));
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 0.65rem 1.4rem;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: transform .2s, box-shadow .2s;
+  box-shadow: 0 4px 14px rgba(13,148,136,.35);
+}
+
+.btnAdd:hover {
+  color: white;
+  text-decoration: none;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(13,148,136,.4);
+}
+
+/* 统计栏 */
+.statsRow {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.statCard {
+  background: white;
+  border-radius: 14px;
+  padding: 1.2rem 1.4rem;
+  box-shadow: 0 1px 8px rgba(0,0,0,.07);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  transition: transform .2s;
+}
+
+.statCard:hover { transform: translateY(-2px); }
+
+.statIcon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+.statIcon.all    { background: #e0f2fe; color: #0284c7; }
+.statIcon.active { background: #d1fae5; color: var(--teal2); }
+.statIcon.draft  { background: var(--amberLight); color: var(--amber); }
+.statIcon.ended  { background: var(--slateLight); color: var(--slate); }
+
+.statNum {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1;
+}
+
+.statLabel {
+  font-size: 0.78rem;
+  color: var(--slate);
+  margin-top: 2px;
+}
+
+/* 卡片网格 */
+.actGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 1.2rem;
+}
+
+.actCard {
+  background: white;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 2px 12px rgba(0,0,0,.07);
+  transition: transform .25s, box-shadow .25s;
+  display: flex;
+  flex-direction: column;
+}
+
+.actCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 30px rgba(0,0,0,.12);
+}
+
+.actCardBar { height: 5px; }
+.actCardBar.baractive { background: linear-gradient(90deg, var(--teal), var(--teal2)); }
+.actCardBar.bardraft  { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+.actCardBar.barended  { background: linear-gradient(90deg, #94a3b8, #cbd5e1); }
+
+.actCardBody {
+  padding: 1.3rem 1.4rem;
+  flex: 1;
+}
+
+.statusBadge {
+  display: inline-block;
+  padding: 0.2rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.72rem;
+  font-weight: 500;
+  margin-bottom: 0.8rem;
+}
+
+.statusBadge.active { background: #d1fae5; color: #065f46; }
+.statusBadge.draft  { background: var(--amberLight); color: #92400e; }
+.statusBadge.ended  { background: var(--slateLight); color: #475569; }
+
+.actCardName {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 1rem;
+  line-height: 1.3;
+}
+
+.actMeta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.actMetaItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  font-size: 0.83rem;
+  color: #475569;
+}
+
+.actMetaItem i {
+  width: 16px;
+  color: var(--teal);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.actDescText {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.actCardFoot {
+  padding: 0.9rem 1.4rem;
+  border-top: 1px solid #f1f5f9;
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.btnAction {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.35rem 0.9rem;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all .18s;
+}
+
+.btnView  { background: #f0fdf4; color: var(--teal2); }
+.btnView:hover  { background: #d1fae5; color: #065f46; text-decoration: none; }
+.btnEdit  { background: #eff6ff; color: #3b82f6; }
+.btnEdit:hover  { background: #dbeafe; color: #1d4ed8; text-decoration: none; }
+.btnDel   { background: #fff1f2; color: #ef4444; margin-left: auto; }
+.btnDel:hover   { background: #fee2e2; color: #b91c1c; text-decoration: none; }
+
+.emptyState {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 4rem 2rem;
+  color: var(--slate);
+}
+
+.emptyState .emptyIcon { font-size: 3rem; color: #cbd5e1; margin-bottom: 1rem; }
+</style>
+
+<div class="actPage">
+
+  <!-- 标题栏 -->
+  <div class="actHeader">
+    <div>
+      <h1 class="actTitle">义诊<span>活动</span></h1>
+      <p class="actSubtitle">管理所有义诊活动，跟踪状态与参与情况</p>
     </div>
-    <table class="table table-hover">
-      <thead>
-        <tr>
-          <th>活动名称</th>
-          <th>地点</th>
-          <th>开始时间</th>
-          <th>结束时间</th>
-          <th>负责人</th>
-          <th>状态</th>
-          <th>操作</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for a in activities %}
-        <tr>
-          <td>{{ a.name }}</td>
-          <td>{{ a.location }}</td>
-          <td>{{ a.start_time|date:"Y-m-d H:i" }}</td>
-          <td>{{ a.end_time|date:"Y-m-d H:i" }}</td>
-          <td>{{ a.leader.get_full_name|default:a.leader.username }}</td>
-          <td>
-            {% if a.status == 'active' %}<span class="label label-success">进行中</span>
-            {% elif a.status == 'draft' %}<span class="label label-default">草稿</span>
-            {% elif a.status == 'ended' %}<span class="label label-warning">已结束</span>
-            {% else %}<span class="label label-danger">已取消</span>{% endif %}
-          </td>
-          <td>
-            <a href="{% url 'admin-view-activity' a.id %}" class="btn btn-info btn-xs">详情</a>
-            <a href="{% url 'update-activity' a.id %}" class="btn btn-primary btn-xs">编辑</a>
-            <a href="{% url 'delete-activity' a.id %}" class="btn btn-danger btn-xs" onclick="return confirm('确认删除？')">删除</a>
-          </td>
-        </tr>
-        {% empty %}
-        <tr><td colspan="7" class="text-center text-muted">暂无活动</td></tr>
-        {% endfor %}
-      </tbody>
-    </table>
+    <a href="{% url 'admin-add-activity' %}" class="btnAdd">
+      <i class="fa fa-plus"></i> 新增活动
+    </a>
   </div>
+
+  <!-- 统计栏（通过模板计数） -->
+  <div class="statsRow">
+    <div class="statCard">
+      <div class="statIcon all"><i class="fa fa-calendar"></i></div>
+      <div>
+        <div class="statNum">{{ activities|length }}</div>
+        <div class="statLabel">全部活动</div>
+      </div>
+    </div>
+    <div class="statCard">
+      <div class="statIcon active"><i class="fa fa-play-circle"></i></div>
+      <div>
+        {% with cnt=0 %}
+        <div class="statNum" id="cntActive">—</div>
+        {% endwith %}
+        <div class="statLabel">进行中</div>
+      </div>
+    </div>
+    <div class="statCard">
+      <div class="statIcon draft"><i class="fa fa-pencil-square-o"></i></div>
+      <div>
+        <div class="statNum" id="cntDraft">—</div>
+        <div class="statLabel">草稿</div>
+      </div>
+    </div>
+    <div class="statCard">
+      <div class="statIcon ended"><i class="fa fa-check-circle"></i></div>
+      <div>
+        <div class="statNum" id="cntEnded">—</div>
+        <div class="statLabel">已结束</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 活动卡片网格 -->
+  <div class="actGrid">
+    {% for a in activities %}
+    <div class="actCard" data-status="{{ a.status }}">
+      <div class="actCardBar bar{{ a.status }}"></div>
+      <div class="actCardBody">
+        <span class="statusBadge {{ a.status }}">
+          {% if a.status == 'active' %}
+            <i class="fa fa-circle" style="font-size:.45rem;vertical-align:middle;margin-right:3px;"></i>进行中
+          {% elif a.status == 'draft' %}
+            草稿
+          {% else %}
+            已结束
+          {% endif %}
+        </span>
+        <h3 class="actCardName">{{ a.name }}</h3>
+        <div class="actMeta">
+          <div class="actMetaItem">
+            <i class="fa fa-map-marker"></i>
+            <span>{{ a.location }}</span>
+          </div>
+          <div class="actMetaItem">
+            <i class="fa fa-clock-o"></i>
+            <span>{{ a.start_time|date:"Y-m-d H:i" }} — {{ a.end_time|date:"m-d H:i" }}</span>
+          </div>
+          <div class="actMetaItem">
+            <i class="fa fa-user-circle-o"></i>
+            <span>负责人：{{ a.leader.get_full_name|default:a.leader.username }}</span>
+          </div>
+          {% if a.description %}
+          <div class="actMetaItem">
+            <i class="fa fa-align-left"></i>
+            <span class="actDescText">{{ a.description }}</span>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+      <div class="actCardFoot">
+        <a href="{% url 'admin-view-activity' a.id %}" class="btnAction btnView">
+          <i class="fa fa-eye"></i> 详情
+        </a>
+        <a href="{% url 'update-activity' a.id %}" class="btnAction btnEdit">
+          <i class="fa fa-pencil"></i> 编辑
+        </a>
+        <a href="{% url 'delete-activity' a.id %}" class="btnAction btnDel"
+           onclick="return confirm('确认删除「{{ a.name }}」？此操作不可恢复。')">
+          <i class="fa fa-trash"></i>
+        </a>
+      </div>
+    </div>
+    {% empty %}
+    <div class="emptyState">
+      <div class="emptyIcon"><i class="fa fa-calendar-o"></i></div>
+      <p>暂无义诊活动，<a href="{% url 'admin-add-activity' %}" style="color:var(--teal);">立即创建</a></p>
+    </div>
+    {% endfor %}
+  </div>
+
 </div>
+
+<!-- 统计数字JS（简单计数） -->
+<script>
+(function(){
+  var cards = document.querySelectorAll('.actCard[data-status]');
+  var cnt = {active:0, draft:0, ended:0};
+  cards.forEach(function(c){ var s = c.dataset.status; if(cnt[s]!==undefined) cnt[s]++; });
+  var a = document.getElementById('cntActive');
+  var d = document.getElementById('cntDraft');
+  var e = document.getElementById('cntEnded');
+  if(a) a.textContent = cnt.active;
+  if(d) d.textContent = cnt.draft;
+  if(e) e.textContent = cnt.ended;
+})();
+</script>
+
 {% endblock content %}

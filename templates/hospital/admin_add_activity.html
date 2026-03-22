@@ -1,30 +1,98 @@
 {% extends 'hospital/admin_base.html' %}
 {% load widget_tweaks %}
 {% block content %}
-<br><br><br>
-<div class="container">
-  <div class="row justify-content-center">
-    <div class="col-md-8">
-      <div class="card">
-        <div class="card-header text-white" style="background:#337AB7;">
-          <h5 class="mb-0">新增义诊活动</h5>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500&display=swap');
+:root { --teal:#0d9488; --teal2:#059669; --slate:#64748b; --slateLight:#f1f5f9; }
+.formPage { font-family:'DM Sans',sans-serif; padding:2rem; background:#f8fafb; min-height:100vh; }
+.breadNav { display:flex; align-items:center; gap:.5rem; font-size:.82rem; color:var(--slate); margin-bottom:1.5rem; }
+.breadNav a { color:var(--teal); text-decoration:none; }
+.formTitle { font-family:'Syne',sans-serif; font-size:1.7rem; font-weight:800; color:#0f172a; margin:0 0 .3rem; }
+.formSubtitle { color:var(--slate); font-size:.87rem; margin-bottom:2rem; }
+.formCard { background:white; border-radius:18px; box-shadow:0 2px 20px rgba(0,0,0,.08); overflow:hidden; max-width:780px; margin:0 auto; }
+.formCardTop { height:4px; background:linear-gradient(90deg,var(--teal),var(--teal2)); }
+.formCardBody { padding:2rem 2.2rem; }
+.formSection { font-family:'Syne',sans-serif; font-size:.78rem; font-weight:700; color:var(--teal); letter-spacing:.08em; text-transform:uppercase; margin:1.8rem 0 1rem; padding-bottom:.5rem; border-bottom:1px solid #f0fdf4; display:flex; align-items:center; gap:.4rem; }
+.formSection:first-of-type { margin-top:0; }
+.formRow { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+.formGroup { margin-bottom:1.2rem; }
+.formLabel { display:block; font-size:.82rem; font-weight:500; color:#374151; margin-bottom:.4rem; }
+.formControl { width:100%; border:1.5px solid #e2e8f0; border-radius:10px; padding:.6rem .9rem; font-family:'DM Sans',sans-serif; font-size:.9rem; color:#1e293b; background:#fafafa; transition:border-color .2s,box-shadow .2s; outline:none; -webkit-appearance:none; box-sizing:border-box; }
+.formControl:focus { border-color:var(--teal); box-shadow:0 0 0 3px rgba(13,148,136,.12); background:white; }
+select.formControl { background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%2394a3b8'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right .75rem center; padding-right:2rem; }
+textarea.formControl { resize:vertical; min-height:100px; }
+.errText { font-size:.75rem; color:#ef4444; margin-top:.25rem; }
+.formFoot { display:flex; align-items:center; gap:1rem; padding:1.4rem 2.2rem; border-top:1px solid #f1f5f9; background:#fafafa; }
+.btnSubmit { display:inline-flex; align-items:center; gap:.5rem; background:linear-gradient(135deg,var(--teal),var(--teal2)); color:white; border:none; border-radius:10px; padding:.65rem 1.8rem; font-family:'DM Sans',sans-serif; font-size:.92rem; font-weight:500; cursor:pointer; transition:transform .2s,box-shadow .2s; box-shadow:0 4px 14px rgba(13,148,136,.35); }
+.btnSubmit:hover { transform:translateY(-1px); box-shadow:0 8px 20px rgba(13,148,136,.4); }
+.btnCancel { display:inline-flex; align-items:center; gap:.4rem; color:var(--slate); text-decoration:none; font-size:.9rem; padding:.65rem 1rem; border-radius:10px; transition:background .18s; }
+.btnCancel:hover { background:var(--slateLight); text-decoration:none; color:#334155; }
+</style>
+
+<div class="formPage">
+  <nav class="breadNav">
+    <a href="{% url 'admin-activity' %}">义诊活动</a>
+    <i class="fa fa-chevron-right" style="font-size:.65rem;"></i>
+    <span>新增活动</span>
+  </nav>
+  <h1 class="formTitle">新增义诊活动</h1>
+  <p class="formSubtitle">填写活动基本信息，创建后可继续编辑</p>
+
+  <div class="formCard">
+    <div class="formCardTop"></div>
+    <form method="post" autocomplete="off">
+      {% csrf_token %}
+      <div class="formCardBody">
+        <div class="formSection"><i class="fa fa-info-circle"></i> 基本信息</div>
+        <div class="formGroup">
+          <label class="formLabel">活动名称 <span style="color:#ef4444;">*</span></label>
+          {% render_field form.name class="formControl" placeholder="例：2025年春季社区义诊" %}
+          {% if form.name.errors %}<div class="errText">{{ form.name.errors.0 }}</div>{% endif %}
         </div>
-        <div class="card-body">
-          <form method="post">
-            {% csrf_token %}
-            {% for field in form %}
-            <div class="form-group">
-              <label>{{ field.label }}</label>
-              {% render_field field class="form-control" %}
-              {% if field.errors %}<small class="text-danger">{{ field.errors.0 }}</small>{% endif %}
-            </div>
-            {% endfor %}
-            <button type="submit" class="btn btn-primary">保存</button>
-            <a href="{% url 'admin-activity' %}" class="btn btn-secondary">取消</a>
-          </form>
+        <div class="formRow">
+          <div class="formGroup">
+            <label class="formLabel">活动地点 <span style="color:#ef4444;">*</span></label>
+            {% render_field form.location class="formControl" placeholder="填写具体地点" %}
+            {% if form.location.errors %}<div class="errText">{{ form.location.errors.0 }}</div>{% endif %}
+          </div>
+          <div class="formGroup">
+            <label class="formLabel">负责人</label>
+            {% render_field form.leader class="formControl" %}
+            {% if form.leader.errors %}<div class="errText">{{ form.leader.errors.0 }}</div>{% endif %}
+          </div>
+        </div>
+        <div class="formSection"><i class="fa fa-clock-o"></i> 活动时间</div>
+        <div class="formRow">
+          <div class="formGroup">
+            <label class="formLabel">开始时间 <span style="color:#ef4444;">*</span></label>
+            {% render_field form.start_time class="formControl" %}
+            {% if form.start_time.errors %}<div class="errText">{{ form.start_time.errors.0 }}</div>{% endif %}
+          </div>
+          <div class="formGroup">
+            <label class="formLabel">结束时间 <span style="color:#ef4444;">*</span></label>
+            {% render_field form.end_time class="formControl" %}
+            {% if form.end_time.errors %}<div class="errText">{{ form.end_time.errors.0 }}</div>{% endif %}
+          </div>
+        </div>
+        <div class="formSection"><i class="fa fa-tag"></i> 状态与说明</div>
+        <div class="formGroup">
+          <label class="formLabel">活动状态</label>
+          {% render_field form.status class="formControl" %}
+          {% if form.status.errors %}<div class="errText">{{ form.status.errors.0 }}</div>{% endif %}
+        </div>
+        <div class="formGroup">
+          <label class="formLabel">活动描述</label>
+          {% render_field form.description class="formControl" placeholder="简单描述活动目的、服务内容等（可选）" %}
+          {% if form.description.errors %}<div class="errText">{{ form.description.errors.0 }}</div>{% endif %}
         </div>
       </div>
-    </div>
+      <div class="formFoot">
+        <button type="submit" class="btnSubmit"><i class="fa fa-check"></i> 保存活动</button>
+        <a href="{% url 'admin-activity' %}" class="btnCancel"><i class="fa fa-times"></i> 取消</a>
+      </div>
+    </form>
   </div>
 </div>
+
 {% endblock content %}

@@ -1,51 +1,412 @@
 {% extends 'hospital/admin_base.html' %}
 {% block content %}
-<br><br><br>
-<div class="container">
-  <div class="row">
-    <!-- 活动基本信息 -->
-    <div class="col-md-5">
-      <div class="panel panel-primary">
-        <div class="panel-heading"><h6 class="panel-title">活动详情</h6></div>
-        <div class="panel-body" style="padding:15px;">
-          <table class="table table-bordered">
-            <tr><th>活动名称</th><td>{{ activity.name }}</td></tr>
-            <tr><th>地点</th><td>{{ activity.location }}</td></tr>
-            <tr><th>开始时间</th><td>{{ activity.start_time|date:"Y-m-d H:i" }}</td></tr>
-            <tr><th>结束时间</th><td>{{ activity.end_time|date:"Y-m-d H:i" }}</td></tr>
-            <tr><th>负责人</th><td>{{ activity.leader.get_full_name|default:activity.leader.username }}</td></tr>
-            <tr><th>状态</th><td>{{ activity.get_status_display }}</td></tr>
-            <tr><th>描述</th><td>{{ activity.description|linebreaksbr }}</td></tr>
-          </table>
-          <a href="{% url 'update-activity' activity.id %}" class="btn btn-primary btn-sm">编辑</a>
-          <a href="{% url 'admin-activity' %}" class="btn btn-secondary btn-sm">返回列表</a>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500&display=swap');
+:root {
+  --teal:#0d9488; --teal2:#059669; --tealLight:#f0fdf4;
+  --amber:#f59e0b; --slate:#64748b; --slateLight:#f1f5f9;
+}
+
+.detailPage {
+  font-family:'DM Sans',sans-serif;
+  padding:0 0 4rem;
+  background:#f8fafb;
+  min-height:100vh;
+}
+
+/* ---- 顶部英雄区 ---- */
+.heroSection {
+  background:linear-gradient(135deg,#0f766e 0%,#059669 100%);
+  padding:2.5rem 2.5rem 3.5rem;
+  position:relative;
+  overflow:hidden;
+}
+
+/* 装饰性背景圆 */
+.heroSection::before {
+  content:'';
+  position:absolute;
+  width:300px; height:300px;
+  border-radius:50%;
+  background:rgba(255,255,255,.06);
+  top:-80px; right:-80px;
+}
+
+.heroSection::after {
+  content:'';
+  position:absolute;
+  width:180px; height:180px;
+  border-radius:50%;
+  background:rgba(255,255,255,.04);
+  bottom:-60px; left:30%;
+}
+
+.heroBread {
+  display:flex; align-items:center; gap:.5rem;
+  font-size:.82rem; color:rgba(255,255,255,.7);
+  margin-bottom:1.5rem;
+}
+
+.heroBread a { color:rgba(255,255,255,.85); text-decoration:none; }
+.heroBread a:hover { color:white; }
+
+.heroStatusBadge {
+  display:inline-block;
+  padding:.25rem .9rem;
+  border-radius:20px;
+  font-size:.75rem; font-weight:600;
+  margin-bottom:.8rem;
+  letter-spacing:.02em;
+}
+.heroStatusBadge.active { background:rgba(255,255,255,.2); color:white; border:1px solid rgba(255,255,255,.3); }
+.heroStatusBadge.draft  { background:rgba(245,158,11,.25); color:#fef3c7; border:1px solid rgba(245,158,11,.3); }
+.heroStatusBadge.ended  { background:rgba(255,255,255,.12); color:rgba(255,255,255,.7); border:1px solid rgba(255,255,255,.2); }
+
+.heroTitle {
+  font-family:'Syne',sans-serif;
+  font-size:2rem; font-weight:800;
+  color:white;
+  margin:0 0 1.2rem;
+  line-height:1.2;
+  max-width:600px;
+}
+
+.heroMeta {
+  display:flex; flex-wrap:wrap; gap:1.2rem;
+}
+
+.heroMetaItem {
+  display:flex; align-items:center; gap:.5rem;
+  font-size:.88rem; color:rgba(255,255,255,.85);
+}
+
+.heroMetaItem i { color:rgba(255,255,255,.6); }
+
+.heroActions {
+  position:absolute;
+  top:2.5rem; right:2.5rem;
+  display:flex; gap:.7rem;
+}
+
+.heroBtn {
+  display:inline-flex; align-items:center; gap:.4rem;
+  padding:.55rem 1.2rem;
+  border-radius:10px;
+  font-size:.85rem; font-weight:500;
+  text-decoration:none;
+  transition:all .2s;
+}
+
+.heroBtnEdit {
+  background:rgba(255,255,255,.15);
+  color:white;
+  border:1px solid rgba(255,255,255,.25);
+  backdrop-filter:blur(4px);
+}
+.heroBtnEdit:hover { background:rgba(255,255,255,.25); color:white; text-decoration:none; }
+
+.heroBtnBack {
+  background:rgba(0,0,0,.12);
+  color:rgba(255,255,255,.85);
+  border:1px solid rgba(255,255,255,.15);
+}
+.heroBtnBack:hover { background:rgba(0,0,0,.2); color:white; text-decoration:none; }
+
+/* ---- 内容区 ---- */
+.contentWrap {
+  padding:0 2.5rem;
+  margin-top:-1.5rem;
+  position:relative;
+  z-index:1;
+}
+
+/* ---- 信息卡片 ---- */
+.infoCard {
+  background:white;
+  border-radius:16px;
+  box-shadow:0 4px 20px rgba(0,0,0,.08);
+  margin-bottom:1.5rem;
+  overflow:hidden;
+}
+
+.cardHead {
+  padding:1rem 1.5rem;
+  border-bottom:1px solid #f0f4f8;
+  display:flex; align-items:center; gap:.6rem;
+}
+
+.cardHeadIcon {
+  width:32px; height:32px;
+  border-radius:9px;
+  background:var(--tealLight);
+  color:var(--teal2);
+  display:flex; align-items:center; justify-content:center;
+  font-size:.9rem;
+  flex-shrink:0;
+}
+
+.cardHeadTitle {
+  font-family:'Syne',sans-serif;
+  font-size:.95rem; font-weight:700;
+  color:#1e293b;
+  margin:0;
+}
+
+.cardHeadCount {
+  margin-left:auto;
+  background:#f0fdf4; color:#065f46;
+  border-radius:12px; padding:.1rem .7rem;
+  font-size:.75rem; font-weight:600;
+}
+
+/* 描述内容 */
+.descBody {
+  padding:1.2rem 1.5rem;
+  color:#475569;
+  font-size:.9rem;
+  line-height:1.7;
+}
+
+/* ---- 信息网格 ---- */
+.infoGrid {
+  display:grid;
+  grid-template-columns:repeat(auto-fill, minmax(220px, 1fr));
+  gap:0;
+}
+
+.infoItem {
+  padding:1rem 1.5rem;
+  border-right:1px solid #f0f4f8;
+  border-bottom:1px solid #f0f4f8;
+}
+
+.infoItem:last-child,
+.infoItem:nth-child(3n) { border-right:none; }
+
+.infoItemLabel {
+  font-size:.75rem; color:var(--slate);
+  text-transform:uppercase; letter-spacing:.05em;
+  margin-bottom:.35rem;
+}
+
+.infoItemValue {
+  font-size:.92rem; color:#1e293b;
+  font-weight:500;
+}
+
+/* ---- 时间线 ---- */
+.timelineWrap {
+  padding:1.5rem;
+  display:flex; align-items:center; gap:0;
+}
+
+.tlNode {
+  display:flex; flex-direction:column; align-items:center;
+  flex:0 0 auto;
+}
+
+.tlDot {
+  width:14px; height:14px;
+  border-radius:50%;
+  border:3px solid var(--teal);
+  background:white;
+}
+
+.tlDot.end { border-color:#94a3b8; }
+
+.tlLabel {
+  font-size:.72rem; color:var(--slate);
+  text-align:center; margin-top:.4rem; white-space:nowrap;
+}
+
+.tlTime {
+  font-size:.85rem; font-weight:600; color:#1e293b;
+  text-align:center; margin-top:.1rem; white-space:nowrap;
+}
+
+.tlLine {
+  flex:1;
+  height:2px;
+  background:linear-gradient(90deg, var(--teal), #94a3b8);
+  margin:0 .5rem;
+  margin-bottom:2rem;
+}
+
+/* ---- 参与者列表 ---- */
+.participantList {
+  padding:.5rem 0;
+}
+
+.participantRow {
+  display:flex; align-items:center; gap:1rem;
+  padding:.85rem 1.5rem;
+  transition:background .15s;
+}
+
+.participantRow:hover { background:#fafffe; }
+.participantRow + .participantRow { border-top:1px solid #f0f4f8; }
+
+/* 头像（首字母） */
+.avatar {
+  width:38px; height:38px;
+  border-radius:12px;
+  display:flex; align-items:center; justify-content:center;
+  font-family:'Syne',sans-serif;
+  font-size:.9rem; font-weight:700; color:white;
+  flex-shrink:0;
+}
+
+/* 不同角色用不同颜色 */
+.avatar.doctor    { background:linear-gradient(135deg,#0d9488,#059669); }
+.avatar.volunteer { background:linear-gradient(135deg,#7c3aed,#6d28d9); }
+
+.participantName {
+  font-weight:500; color:#1e293b; font-size:.9rem;
+}
+
+.participantUser {
+  font-size:.78rem; color:var(--slate);
+}
+
+.roleBadge {
+  margin-left:auto;
+  padding:.2rem .75rem;
+  border-radius:12px;
+  font-size:.75rem; font-weight:500;
+}
+
+.roleBadge.doctor    { background:#d1fae5; color:#065f46; }
+.roleBadge.volunteer { background:#ede9fe; color:#4c1d95; }
+
+.joinedAt { font-size:.75rem; color:#94a3b8; margin-left:.8rem; }
+
+/* 空状态 */
+.emptyParticipant {
+  text-align:center;
+  padding:2.5rem 1rem;
+  color:var(--slate);
+}
+
+.emptyParticipant i { font-size:2rem; color:#cbd5e1; margin-bottom:.8rem; display:block; }
+</style>
+
+<div class="detailPage">
+
+  <!-- 英雄区 -->
+  <div class="heroSection">
+    <nav class="heroBread">
+      <a href="{% url 'admin-activity' %}">义诊活动</a>
+      <i class="fa fa-chevron-right" style="font-size:.6rem;"></i>
+      <span>{{ activity.name }}</span>
+    </nav>
+
+    <span class="heroStatusBadge {{ activity.status }}">
+      {% if activity.status == 'active' %}
+        <i class="fa fa-circle" style="font-size:.45rem;vertical-align:middle;margin-right:3px;"></i>进行中
+      {% elif activity.status == 'draft' %}草稿{% else %}已结束{% endif %}
+    </span>
+
+    <h1 class="heroTitle">{{ activity.name }}</h1>
+
+    <div class="heroMeta">
+      <div class="heroMetaItem">
+        <i class="fa fa-map-marker"></i>
+        <span>{{ activity.location }}</span>
+      </div>
+      <div class="heroMetaItem">
+        <i class="fa fa-user-circle-o"></i>
+        <span>负责人：{{ activity.leader.get_full_name|default:activity.leader.username }}</span>
+      </div>
+      <div class="heroMetaItem">
+        <i class="fa fa-users"></i>
+        <span>{{ participants|length }} 名参与人员</span>
+      </div>
+      <div class="heroMetaItem">
+        <i class="fa fa-calendar-o"></i>
+        <span>创建于 {{ activity.created_at|date:"Y-m-d" }}</span>
+      </div>
+    </div>
+
+    <!-- 右上角操作按钮 -->
+    <div class="heroActions">
+      <a href="{% url 'update-activity' activity.id %}" class="heroBtn heroBtnEdit">
+        <i class="fa fa-pencil"></i> 编辑
+      </a>
+      <a href="{% url 'admin-activity' %}" class="heroBtn heroBtnBack">
+        <i class="fa fa-arrow-left"></i> 返回
+      </a>
+    </div>
+  </div>
+
+  <!-- 内容区 -->
+  <div class="contentWrap">
+
+    <!-- 时间信息卡 -->
+    <div class="infoCard">
+      <div class="cardHead">
+        <div class="cardHeadIcon"><i class="fa fa-clock-o"></i></div>
+        <h2 class="cardHeadTitle">活动时间</h2>
+      </div>
+      <div class="timelineWrap">
+        <div class="tlNode">
+          <div class="tlDot"></div>
+          <div class="tlLabel">开始</div>
+          <div class="tlTime">{{ activity.start_time|date:"Y-m-d" }}</div>
+          <div style="font-size:.8rem;color:#94a3b8;text-align:center;">{{ activity.start_time|date:"H:i" }}</div>
+        </div>
+        <div class="tlLine"></div>
+        <div class="tlNode">
+          <div class="tlDot end"></div>
+          <div class="tlLabel">结束</div>
+          <div class="tlTime">{{ activity.end_time|date:"Y-m-d" }}</div>
+          <div style="font-size:.8rem;color:#94a3b8;text-align:center;">{{ activity.end_time|date:"H:i" }}</div>
         </div>
       </div>
     </div>
 
-    <!-- 参与者列表 -->
-    <div class="col-md-7">
-      <div class="panel panel-primary">
-        <div class="panel-heading"><h6 class="panel-title">参与人员（{{ participants|length }}人）</h6></div>
-        <table class="table table-hover">
-          <thead>
-            <tr><th>姓名</th><th>账号</th><th>角色</th><th>加入时间</th></tr>
-          </thead>
-          <tbody>
-            {% for p in participants %}
-            <tr>
-              <td>{{ p.user.get_full_name|default:p.user.username }}</td>
-              <td>{{ p.user.username }}</td>
-              <td>{{ p.get_role_display }}</td>
-              <td>{{ p.joined_at|date:"Y-m-d" }}</td>
-            </tr>
-            {% empty %}
-            <tr><td colspan="4" class="text-center text-muted">暂无参与人员</td></tr>
-            {% endfor %}
-          </tbody>
-        </table>
+    <!-- 活动描述 -->
+    {% if activity.description %}
+    <div class="infoCard">
+      <div class="cardHead">
+        <div class="cardHeadIcon"><i class="fa fa-align-left"></i></div>
+        <h2 class="cardHeadTitle">活动描述</h2>
+      </div>
+      <div class="descBody">{{ activity.description|linebreaksbr }}</div>
+    </div>
+    {% endif %}
+
+    <!-- 参与人员 -->
+    <div class="infoCard">
+      <div class="cardHead">
+        <div class="cardHeadIcon"><i class="fa fa-users"></i></div>
+        <h2 class="cardHeadTitle">参与人员</h2>
+        <span class="cardHeadCount">{{ participants|length }} 人</span>
+      </div>
+      <div class="participantList">
+        {% for p in participants %}
+        <div class="participantRow">
+          <!-- 头像：取姓名首字 -->
+          <div class="avatar {{ p.role }}">
+            {{ p.user.get_full_name|default:p.user.username|slice:":1"|upper }}
+          </div>
+          <div>
+            <div class="participantName">{{ p.user.get_full_name|default:p.user.username }}</div>
+            <div class="participantUser">@{{ p.user.username }}</div>
+          </div>
+          <span class="roleBadge {{ p.role }}">{{ p.get_role_display }}</span>
+          <span class="joinedAt"><i class="fa fa-clock-o"></i> {{ p.joined_at|date:"m-d" }}</span>
+        </div>
+        {% empty %}
+        <div class="emptyParticipant">
+          <i class="fa fa-user-plus"></i>
+          <p style="margin:0;font-size:.9rem;">暂无参与人员</p>
+        </div>
+        {% endfor %}
       </div>
     </div>
-  </div>
+
+  </div><!-- /contentWrap -->
 </div>
+
 {% endblock content %}
