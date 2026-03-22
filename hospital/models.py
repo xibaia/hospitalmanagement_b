@@ -90,8 +90,8 @@ class Doctor(models.Model):
     address = models.CharField(max_length=40, blank=True, default='')
     department = models.CharField(max_length=50, choices=departments, blank=True, default='', verbose_name='科室(旧)')
 
-    # M2M 专科，通过 DoctorSpecialty 中间表
-    specialties = models.ManyToManyField('self', through='DoctorSpecialty', symmetrical=False, blank=True)
+    # 专科数据通过 DoctorSpecialty 中间表查询：DoctorSpecialty.objects.filter(doctor=self)
+    # 原来的 M2M 声明 ManyToManyField('self') 是错误的（表示 Doctor-Doctor 关系），已移除
 
     @property
     def get_name(self):
@@ -122,6 +122,7 @@ class DoctorSpecialty(models.Model):
     class Meta:
         verbose_name = '医生专科'
         verbose_name_plural = '医生专科列表'
+        unique_together = ('doctor', 'specialty')
 
 
 # ==================== Volunteer ====================
@@ -167,7 +168,7 @@ class Patient(models.Model):
     # 保留旧字段，不删除以兼容旧逻辑
     status = models.BooleanField(default=True, verbose_name='状态')
     symptoms = models.CharField(max_length=100, null=True, blank=True, verbose_name='症状(旧)')
-    assignedDoctorId = models.PositiveIntegerField(null=True, blank=True, verbose_name='分配医生ID(旧)')
+    assignedDoctorId = models.PositiveIntegerField(null=True, blank=True, db_index=True, verbose_name='分配医生ID(旧)')
     admitDate = models.DateField(auto_now=True, verbose_name='入院日期(旧)')
     profile_pic = models.ImageField(upload_to='profile_pic/PatientProfilePic/', null=True, blank=True, verbose_name='头像(旧)')
 
@@ -281,8 +282,9 @@ class MedicalRecord(models.Model):
         User, on_delete=models.SET_NULL, null=True,
         related_name='volunteered_records', verbose_name='接诊志愿者'
     )
+    # 改为直接关联 Doctor 模型，避免每次取医生名需要额外查询
     doctor = models.ForeignKey(
-        User, null=True, blank=True, on_delete=models.SET_NULL,
+        'Doctor', null=True, blank=True, on_delete=models.SET_NULL,
         related_name='doctor_records', verbose_name='诊疗医生'
     )
     check_date = models.DateField(default=date.today, verbose_name='就诊日期')
@@ -330,12 +332,21 @@ class MedicalRecord(models.Model):
 
     def save(self, *args, **kwargs):
         # 自动生成就诊流水号，格式 YYYYMMDD-NNN
+        # 使用 IntegrityError 重试机制，兼容 SQLite（不支持行锁）和 PostgreSQL
         if not self.visit_no:
+            from django.db import IntegrityError
             today = date.today().strftime('%Y%m%d')
-            count = MedicalRecord.objects.filter(
-                visit_no__startswith=today
-            ).count() + 1
-            self.visit_no = f"{today}-{count:03d}"
+            for attempt in range(1, 20):  # 最多重试19次，足够应对高并发
+                count = MedicalRecord.objects.filter(
+                    visit_no__startswith=today
+                ).count() + attempt
+                self.visit_no = f"{today}-{count:03d}"
+                try:
+                    return super().save(*args, **kwargs)
+                except IntegrityError:
+                    self.visit_no = ''   # 清空后下一轮重新生成
+                    continue
+            raise RuntimeError('无法生成唯一就诊流水号，请稍后重试')
         super().save(*args, **kwargs)
 
     def __str__(self):
@@ -391,10 +402,10 @@ class Station(models.Model):
 # ==================== 保留原有模型不动 ====================
 
 class Appointment(models.Model):
-    patientId = models.PositiveIntegerField(null=True)
-    doctorId = models.PositiveIntegerField(null=True)
-    patientName = models.CharField(max_length=40, null=True)
-    doctorName = models.CharField(max_length=40, null=True)
+    patient = models.ForeignKey('Patient', null=True, blank=True, on_delete=models.SET_NULL, related_name='appointments', verbose_name='患者')
+    doctor = models.ForeignKey('Doctor', null=True, blank=True, on_delete=models.SET_NULL, related_name='appointments', verbose_name='医生')
+    patientName = models.CharField(max_length=40, null=True)   # 冗余字段，保留供 PDF/模板展示
+    doctorName = models.CharField(max_length=40, null=True)    # 冗余字段，保留供 PDF/模板展示
     appointmentDate = models.DateField(auto_now=True)
     description = models.TextField(max_length=500)
     status = models.BooleanField(default=False)
@@ -408,9 +419,9 @@ class Appointment(models.Model):
 
 
 class PatientDischargeDetails(models.Model):
-    patientId = models.PositiveIntegerField(null=True)
-    patientName = models.CharField(max_length=40)
-    assignedDoctorName = models.CharField(max_length=40)
+    patient = models.ForeignKey('Patient', null=True, blank=True, on_delete=models.SET_NULL, related_name='discharge_details', verbose_name='患者')
+    patientName = models.CharField(max_length=40)          # 冗余字段，保留供 PDF/模板展示
+    assignedDoctorName = models.CharField(max_length=40)   # 冗余字段，保留供 PDF/模板展示
     address = models.CharField(max_length=40)
     mobile = models.CharField(max_length=20, null=True)
     symptoms = models.CharField(max_length=100, null=True)

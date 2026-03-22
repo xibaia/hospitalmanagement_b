@@ -23,6 +23,19 @@ class DoctorUserForm(forms.ModelForm):
         widgets = {
         'password': forms.PasswordInput()
         }
+
+# 更新医生资料专用（不含 password，避免覆盖密码）
+class DoctorUserUpdateForm(forms.ModelForm):
+    class Meta:
+        model=User
+        fields=['first_name','last_name','username']
+
+# 更新患者资料专用（不含 password）
+class PatientUserUpdateForm(forms.ModelForm):
+    class Meta:
+        model=User
+        fields=['first_name','last_name','username']
+
 class DoctorForm(forms.ModelForm):
     class Meta:
         model=models.Doctor
@@ -50,18 +63,18 @@ class PatientForm(forms.ModelForm):
 
 
 class AppointmentForm(forms.ModelForm):
-    doctorId=forms.ModelChoiceField(queryset=models.Doctor.objects.all().filter(status=True),empty_label="Doctor Name and Department", to_field_name="user_id")
-    patientId=forms.ModelChoiceField(queryset=models.Patient.objects.all().filter(status=True),empty_label="Patient Name and Symptoms", to_field_name="user_id")
+    doctor = forms.ModelChoiceField(queryset=models.Doctor.objects.filter(status=True), empty_label="Doctor Name and Department")
+    patient = forms.ModelChoiceField(queryset=models.Patient.objects.filter(status=True), empty_label="Patient Name and Symptoms")
     class Meta:
-        model=models.Appointment
-        fields=['description','status']
+        model = models.Appointment
+        fields = ['doctor', 'patient', 'description', 'status']
 
 
 class PatientAppointmentForm(forms.ModelForm):
-    doctorId=forms.ModelChoiceField(queryset=models.Doctor.objects.all().filter(status=True),empty_label="Doctor Name and Department", to_field_name="user_id")
+    doctor = forms.ModelChoiceField(queryset=models.Doctor.objects.filter(status=True), empty_label="Doctor Name and Department")
     class Meta:
-        model=models.Appointment
-        fields=['description','status']
+        model = models.Appointment
+        fields = ['doctor', 'description', 'status']
 
 
 # ==================== 志愿者 ====================
