@@ -53,46 +53,46 @@ Three user roles (Django Groups): **ADMIN**, **DOCTOR**, **PATIENT**. Web views 
 - `hospital/serializers.py` — DRF serializers for API data transformation
 - `hospital/forms.py` — Django forms for web UI
 
-### Key Models (`hospital/models.py`)
+### Key Models ([models.py](file:///Users/songmingyang/WeChatProjects/hospitalmanagement_b/hospital/models.py))
 
-- `Doctor` — OneToOne with User, has `department` (choice field), `status` (approval flag), `mobile`, `address`, `profile_pic`
-- `Patient` — OneToOne with User, has `assignedDoctorId`, `admitDate`, `symptoms`, `status`
-- `Appointment` — links patientId/doctorId with date, description, and status
-- `PatientDischargeDetails` — billing record with roomCharge/medicineCost/doctorFee/OtherCharge/total
+- `Doctor` — OneToOne with User, has `department` (legacy), `status` (approval flag), `mobile`, `address`, `profile_pic`. Specialized info via `DoctorSpecialty`.
+- `Patient` — OneToOne with User, has `assignedDoctorId` (legacy ID), `admitDate` (legacy), `symptoms` (legacy), `status`.
+- `MedicalRecord` — Central clinical record, FK to `Patient`, `Doctor`, `Activity`, and `User` (volunteer). Generates unique `visit_no`.
+- `Appointment` — links `Patient` / `Doctor` via ForeignKeys.
+- `PatientDischargeDetails` — billing record with roomCharge/medicineCost/doctorFee/OtherCharge/total. FK to `Patient`.
 
-**Important**: `assignedDoctorId`, `patientId`, `doctorId` are `PositiveIntegerField`, NOT foreign keys. All model relationships are resolved via manual queries (e.g., `Doctor.objects.get(id=assignedDoctorId)`), not Django ORM joins.
+**Important**: New relations use ForeignKeys. Older fields like `assignedDoctorId` are kept for legacy compatibility but new logic should prefer `MedicalRecord` associations.
 
 ### API Endpoints
 
-```
-POST /api/patient/register/      # AllowAny — patient registration
-POST /api/patient/login/         # AllowAny — returns Token
-POST /api/patient/logout/        # Authenticated — deletes Token
-GET  /api/patient/info/          # Patient profile
-PUT  /api/patient/update/        # Update patient info
-GET  /api/doctors/               # List approved doctors
-POST /api/patient/bind-doctor/   # Bind doctor (QR code scan scenario)
-```
+Check [API_Documentation.md](file:///Users/songmingyang/WeChatProjects/hospitalmanagement_b/API_Documentation.md) for full v2.0 spec. Key prefixes:
+- `/api/patient/` — Registration, info, records, medical history.
+- `/api/doctor/` — Login, patients list, records management, confirm diagnosis.
+- `/api/activities/` — List, join, leave charity events.
+- `/api/doctors/` — Public list of approved doctors.
+- `/api/stations/` — List of active screening stations.
 
-### API Authentication
+### API Authentication & Security
 
-DRF Token authentication. Tokens created on login, returned in response body. Clients send `Authorization: Token <token>` header. Global default is `IsAuthenticated`; registration/login use `@permission_classes([AllowAny])`.
-
-### PDF Generation
-
-Discharge bills generated server-side using `xhtml2pdf`, triggered from admin views. Templates in `templates/hospital/`.
+- **Auth**: DRF Token authentication. `Authorization: Token <token>` header.
+- **CORS**: Configurable via `.env` (`CORS_ALLOWED_ORIGINS`).
+- **Rate Limiting**: Throttling enabled (Anon: 30/min, User: 300/min).
+- **Security**: Security headers (XSS, NoSniff, FrameOptions) and HTTPS settings controlled via `.env`.
 
 ### Static & Media Files
 
-`MEDIA_ROOT` is set to `STATIC_DIR` — profile picture uploads go into `static/`. In production, this needs separation.
+- `STATIC_URL = '/static/'` — for CSS/JS/images.
+- `MEDIA_URL = '/media/'` — for user-uploaded profile pictures and clinical photos.
+- `MEDIA_ROOT` is now a separate `media/` directory in project root.
 
-### Database
+### Database & Config
 
-SQLite3 (`db.sqlite3`) for development. No fixtures; initial data created via admin UI or `createsuperuser`.
+- **Database**: SQLite3 for development, PostgreSQL for production (switched via `DJANGO_ENV`).
+- **Config**: Managed via `python-decouple` (`.env` file). See `.env.example`.
 
-### Known Caveats
+### Known Caveats (Fixed)
 
-- `SECRET_KEY` is hardcoded in `settings.py` — must be externalized for production
-- `ALLOWED_HOSTS = []` — needs configuration for deployment
-- `DEBUG = True` with no environment-based switching
-- No `.env` file for sensitive config management
+- [x] `SECRET_KEY` and sensitive data moved to `.env`.
+- [x] `DEBUG` and `ALLOWED_HOSTS` controlled via environment.
+- [x] Separate `media/` storage for uploads.
+- [x] Rate limiting and security headers implemented.

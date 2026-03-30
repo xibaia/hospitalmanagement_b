@@ -122,7 +122,8 @@ venv\Scripts\activate
 # Linux/Mac 激活
 source venv/bin/activate
 
-# 2. 安装依赖（使用国内镜像）
+# 2. 配置文件与依赖安装
+cp .env.example .env   # 复制配置模板（必须）
 pip install -r requirement.txt -i https://pypi.tuna.tsinghua.edu.cn/simple --trusted-host pypi.tuna.tsinghua.edu.cn
 
 # 3. 升级 widget_tweaks（解决 pkg_resources 问题）

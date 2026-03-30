@@ -83,7 +83,7 @@
 | L2 | serializers.py | symptoms/address required=False 未设 | ⬜ 待修 |
 | L4 | serializers.py | ToothFinding tooth_number 无范围校验 | ⬜ 待修 |
 
-## 架构级问题（需单独评估）
+## 架构级问题（已修复）
 
 | # | 文件 | 问题 | 状态 |
 |---|------|------|------|
