@@ -52,8 +52,50 @@ class WebUITestCase(StaticLiveServerTestCase):
         self.page.locator('button[type="submit"]').click()
         self.page.wait_for_load_state("networkidle")
 
+    def logout(self):
+        response = self.page.request.post(
+            f"{self.live_server_url}/logout",
+            headers={"X-CSRFToken": self._csrf_token()},
+        )
+        self.assertEqual(response.status, 200)
+
+    def assert_url_contains(self, path):
+        self.assertIn(path, self.page.url)
+
     def assert_page_contains(self, text):
         self.assertIn(text, self.page.content())
+
+    def submit_first_form(self):
+        submit = self.page.locator(
+            'form button[type="submit"], form input[type="submit"]'
+        )
+        if submit.count() == 0:
+            submit = self.page.locator('button[type="submit"], input[type="submit"]')
+        submit.first.click()
+        self.page.wait_for_load_state("networkidle")
+
+    def select_first_real_option(self, selector):
+        select = self.page.locator(selector)
+        values = select.locator("option").evaluate_all(
+            "(options) => options.map((option) => option.value).filter(Boolean)"
+        )
+        self.assertGreater(len(values), 0)
+        select.select_option(values[0])
+        return values[0]
+
+    def click_form_action(self, action_fragment):
+        button = self.page.locator(
+            f'form[action*="{action_fragment}"] button[type="submit"]'
+        )
+        self.assertEqual(button.count(), 1)
+        button.click()
+        self.page.wait_for_load_state("networkidle")
+
+    def _csrf_token(self):
+        for cookie in self.page.context.cookies(self.live_server_url):
+            if cookie["name"] == "csrftoken":
+                return cookie["value"]
+        self.fail("Missing CSRF cookie before logout")
 
     def _test_has_failed(self):
         outcome = getattr(self, "_outcome", None)

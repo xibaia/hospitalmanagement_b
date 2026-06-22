@@ -190,7 +190,7 @@ def doctor_create_record_view(request):
 @user_passes_test(is_doctor, login_url="doctorlogin")
 def doctor_update_record_view(request, pk):
     doctor = models.Doctor.objects.get(user_id=request.user.id)
-    record = models.MedicalRecord.objects.get(id=pk)
+    record = get_object_or_404(models.MedicalRecord, id=pk, doctor=doctor)
     was_confirmed = record.doctor_confirmed
     form = forms.MedicalRecordForm(instance=record)
     formset = forms.ToothFindingFormSet(instance=record)

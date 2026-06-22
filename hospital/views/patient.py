@@ -1,7 +1,7 @@
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.db.models import Q
 from django.http import HttpResponseRedirect
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404, render
 
 from hospital import forms, models
 from .common import is_patient
@@ -136,7 +136,7 @@ def patient_records_view(request):
 def patient_view_record_view(request, pk):
     """患者查看单个病历详情"""
     patient = models.Patient.objects.get(user=request.user)
-    record = models.MedicalRecord.objects.get(id=pk, patient=patient)
+    record = get_object_or_404(models.MedicalRecord, id=pk, patient=patient)
     findings = models.ToothFinding.objects.filter(record=record)
 
     # record.doctor 已是 FK(Doctor)，直接取名

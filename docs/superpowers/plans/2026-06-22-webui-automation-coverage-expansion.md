@@ -138,7 +138,12 @@ def create_station(name="E2E Station", supervisor=None, is_active=True):
     )
 
 
-def create_volunteer(username="volunteer", password=DEFAULT_PASSWORD, status=True, **kwargs):
+def create_volunteer(
+    username="volunteer",
+    password=DEFAULT_PASSWORD,
+    status=True,
+    **kwargs,
+):
     user = create_grouped_user(
         username=username,
         group_name="VOLUNTEER",
@@ -156,7 +161,12 @@ def create_volunteer(username="volunteer", password=DEFAULT_PASSWORD, status=Tru
     return user, volunteer
 
 
-def create_tooth_finding(record, tooth_number=11, finding_type="caries", note="E2E finding"):
+def create_tooth_finding(
+    record,
+    tooth_number=11,
+    finding_type="caries",
+    note="E2E finding",
+):
     return ToothFinding.objects.create(
         record=record,
         tooth_number=tooth_number,
@@ -171,7 +181,11 @@ Append these methods inside `WebUITestCase` in `hospital/tests/e2e/base.py`:
 
 ```python
     def logout(self):
-        self.goto("/logout")
+        response = self.page.request.post(
+            f"{self.live_server_url}/logout",
+            headers={"X-CSRFToken": self._csrf_token()},
+        )
+        self.assertEqual(response.status, 200)
 
     def assert_url_contains(self, path):
         self.assertIn(path, self.page.url)
@@ -190,10 +204,18 @@ Append these methods inside `WebUITestCase` in `hospital/tests/e2e/base.py`:
         return values[0]
 
     def click_form_action(self, action_fragment):
-        self.page.locator(
+        button = self.page.locator(
             f'form[action*="{action_fragment}"] button[type="submit"]'
-        ).first.click()
+        )
+        self.assertEqual(button.count(), 1)
+        button.click()
         self.page.wait_for_load_state("networkidle")
+
+    def _csrf_token(self):
+        for cookie in self.page.context.cookies(self.live_server_url):
+            if cookie["name"] == "csrftoken":
+                return cookie["value"]
+        self.fail("Missing CSRF cookie before logout")
 ```
 
 - [ ] **Step 4: Run existing E2E tests**
@@ -474,7 +496,7 @@ OK
 **Files:**
 - Modify: `hospital/tests/e2e/test_patient_ui.py`
 
-- [ ] **Step 1: Update imports**
+- [x] **Step 1: Update imports**
 
 Use this import block:
 
@@ -793,7 +815,7 @@ OK
 - Modify: `hospital/tests/e2e/test_admin_ui.py`
 - Modify: `hospital/tests/e2e/test_patient_ui.py`
 
-- [ ] **Step 1: Add admin discharge bill generation test**
+- [x] **Step 1: Add admin discharge bill generation test**
 
 Append to `AdminWebUITests`:
 
@@ -821,7 +843,7 @@ Append to `AdminWebUITests`:
         self.assertEqual(bill.assignedDoctorName, doctor.get_name)
 ```
 
-- [ ] **Step 2: Add patient discharge page test**
+- [x] **Step 2: Add patient discharge page test**
 
 Update imports in `hospital/tests/e2e/test_patient_ui.py` to include `create_discharge`:
 
@@ -855,7 +877,7 @@ Append to `PatientWebUITests`:
         self.assert_page_contains("460")
 ```
 
-- [ ] **Step 3: Run admin and patient E2E tests**
+- [x] **Step 3: Run admin and patient E2E tests**
 
 Run:
 
@@ -899,7 +921,7 @@ from hospital.tests.helpers import (
 )
 ```
 
-- [ ] **Step 2: Add activity list and create test**
+- [x] **Step 2: Add activity list and create test**
 
 Append to `AdminWebUITests`:
 
@@ -928,7 +950,7 @@ Append to `AdminWebUITests`:
         self.assertTrue(models.Activity.objects.filter(name="E2E created activity").exists())
 ```
 
-- [ ] **Step 3: Add station list and create test**
+- [x] **Step 3: Add station list and create test**
 
 Append to `AdminWebUITests`:
 
@@ -954,7 +976,7 @@ Append to `AdminWebUITests`:
         self.assertTrue(models.Station.objects.filter(name="E2E created station").exists())
 ```
 
-- [ ] **Step 4: Add volunteer list and create test**
+- [x] **Step 4: Add volunteer list and create test**
 
 Append to `AdminWebUITests`:
 
@@ -980,7 +1002,7 @@ Append to `AdminWebUITests`:
         self.assertTrue(models.Volunteer.objects.filter(real_name="E2E Created Volunteer").exists())
 ```
 
-- [ ] **Step 5: Run admin E2E tests**
+- [x] **Step 5: Run admin E2E tests**
 
 Run:
 
@@ -1001,7 +1023,7 @@ OK
 **Files:**
 - Create: `hospital/tests/test_web_method_permissions.py`
 
-- [ ] **Step 1: Create method permission test file**
+- [x] **Step 1: Create method permission test file**
 
 Create `hospital/tests/test_web_method_permissions.py`:
 
@@ -1108,7 +1130,7 @@ class WebMethodPermissionTests(TestCase):
                 self.assertEqual(response.status_code, 302)
 ```
 
-- [ ] **Step 2: Run method permission tests**
+- [x] **Step 2: Run method permission tests**
 
 Run:
 
@@ -1134,7 +1156,7 @@ If a route returns a deliberate `403` instead of `302` or `405`, include `403` i
 - Modify: `scripts/check_webui.sh`
 - Modify: `docs/webui-testing.md`
 
-- [ ] **Step 1: Add E2E-only script**
+- [x] **Step 1: Add E2E-only script**
 
 Create `scripts/check_webui_e2e.sh`:
 
@@ -1145,7 +1167,7 @@ set -euo pipefail
 .venv/bin/python manage.py test hospital.tests.e2e
 ```
 
-- [ ] **Step 2: Make E2E script executable**
+- [x] **Step 2: Make E2E script executable**
 
 Run:
 
@@ -1165,7 +1187,7 @@ Verify with:
 test -x scripts/check_webui_e2e.sh && echo "scripts/check_webui_e2e.sh is executable"
 ```
 
-- [ ] **Step 3: Keep full suite script focused**
+- [x] **Step 3: Keep full suite script focused**
 
 Ensure `scripts/check_webui.sh` remains:
 
@@ -1176,7 +1198,7 @@ set -euo pipefail
 .venv/bin/python manage.py test hospital.tests
 ```
 
-- [ ] **Step 4: Update WebUI testing docs**
+- [x] **Step 4: Update WebUI testing docs**
 
 Add this section to `docs/webui-testing.md`:
 
@@ -1212,7 +1234,7 @@ Add this section to `docs/webui-testing.md`:
 ```
 ```
 
-- [ ] **Step 5: Run module tests**
+- [x] **Step 5: Run module tests**
 
 Run:
 
@@ -1231,7 +1253,7 @@ Expected for each command:
 OK
 ```
 
-- [ ] **Step 6: Run full verification**
+- [x] **Step 6: Run full verification**
 
 Run:
 
@@ -1250,7 +1272,7 @@ OK
 
 for both scripts, no output from `git diff --check`, and `git status --short` showing only files touched by this plan.
 
-- [ ] **Step 7: Stop before commit**
+- [x] **Step 7: Stop before commit**
 
 Do not commit. Report:
 

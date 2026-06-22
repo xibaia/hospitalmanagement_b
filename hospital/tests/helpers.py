@@ -4,7 +4,17 @@ from django.contrib.auth.models import Group, User
 from django.utils import timezone
 from rest_framework.authtoken.models import Token
 
-from hospital.models import Activity, Doctor, MedicalRecord, Patient
+from hospital.models import (
+    Activity,
+    Appointment,
+    Doctor,
+    MedicalRecord,
+    Patient,
+    PatientDischargeDetails,
+    Station,
+    ToothFinding,
+    Volunteer,
+)
 
 
 DEFAULT_PASSWORD = "pass123456"
@@ -90,4 +100,88 @@ def create_record(patient, doctor, activity=None, **kwargs):
         chief_complaint=kwargs.pop("chief_complaint", "Tooth pain"),
         diagnosis=kwargs.pop("diagnosis", "Caries"),
         **kwargs,
+    )
+
+
+def create_appointment(
+    patient,
+    doctor,
+    description="Follow-up appointment",
+    status=True,
+):
+    return Appointment.objects.create(
+        patient=patient,
+        doctor=doctor,
+        patientName=patient.get_name,
+        doctorName=doctor.get_name,
+        description=description,
+        status=status,
+    )
+
+
+def create_discharge(patient, assigned_doctor_name="未指定", total=460):
+    return PatientDischargeDetails.objects.create(
+        patient=patient,
+        patientName=patient.get_name,
+        assignedDoctorName=assigned_doctor_name,
+        address=patient.address,
+        mobile=patient.mobile,
+        symptoms=patient.symptoms,
+        admitDate=patient.admitDate,
+        releaseDate=timezone.now().date(),
+        daySpent=1,
+        medicineCost=120,
+        roomCharge=200,
+        doctorFee=100,
+        OtherCharge=40,
+        total=total,
+    )
+
+
+def create_station(name="E2E Station", supervisor=None, is_active=True):
+    return Station.objects.create(
+        name=name,
+        address="E2E Station Address",
+        latitude=31.2304,
+        longitude=121.4737,
+        supervisor=supervisor,
+        phone="02100000000",
+        is_active=is_active,
+    )
+
+
+def create_volunteer(
+    username="volunteer",
+    password=DEFAULT_PASSWORD,
+    status=True,
+    **kwargs,
+):
+    user = create_grouped_user(
+        username=username,
+        group_name="VOLUNTEER",
+        password=password,
+        first_name=kwargs.pop("first_name", "Vol"),
+        last_name=kwargs.pop("last_name", "Unteer"),
+    )
+    volunteer = Volunteer.objects.create(
+        user=user,
+        real_name=kwargs.pop("real_name", "E2E Volunteer"),
+        mobile=kwargs.pop("mobile", "13700137000"),
+        status=status,
+        **kwargs,
+    )
+    return user, volunteer
+
+
+def create_tooth_finding(
+    record,
+    tooth_number=11,
+    finding_type="caries",
+    note="E2E finding",
+):
+    return ToothFinding.objects.create(
+        record=record,
+        tooth_number=tooth_number,
+        finding_type=finding_type,
+        note=note,
     )

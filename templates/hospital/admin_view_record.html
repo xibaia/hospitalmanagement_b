@@ -10,7 +10,12 @@
         <div class="panel-body" style="padding:15px;">
           <table class="table table-bordered table-sm">
             <tr><th width="120">患者</th><td>{{ record.patient.get_name }}</td><th>就诊日期</th><td>{{ record.check_date }}</td></tr>
-            <tr><th>就诊类型</th><td>{{ record.get_visit_type_display }}</td><th>医生</th><td>{{ record.doctor.get_full_name|default:"—" }}</td></tr>
+            <tr>
+              <th>就诊类型</th>
+              <td>{{ record.get_visit_type_display }}</td>
+              <th>医生</th>
+              <td>{% if record.doctor %}{{ record.doctor.get_name }}{% else %}—{% endif %}</td>
+            </tr>
             <tr><th>所属活动</th><td colspan="3">{{ record.activity.name|default:"—" }}</td></tr>
           </table>
 
