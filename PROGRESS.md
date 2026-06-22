@@ -1,5 +1,5 @@
 # 项目问题修复进度
-> 更新时间：2026-03-22（第三轮分析修复完成，所有已知问题已全部清零）
+> 更新时间：2026-06-22（技术栈现代化、权限加固、部署改造和文档收尾完成）
 
 ## 高危问题（优先修复）
 
@@ -90,3 +90,16 @@
 | A1 | models.py:284 | MedicalRecord.doctor FK 到 User 而非 Doctor（N+1 根源） | ✅ 已修复（迁移 0002）|
 | A2 | models.py:393 | Appointment/PatientDischargeDetails 用裸整数代替外键 | ✅ 已修复（迁移 0003）|
 | A3 | api_views.py:758 | 医生权限靠手动调函数，应改为装饰器 | ✅ 已修复 |
+
+## 技术栈现代化新增进度（2026-06-22）
+
+| # | 范围 | 结果 | 状态 |
+|---|------|------|------|
+| S1 | Python / Django / DRF | 统一到 Python 3.12、Django 5.2.15、DRF 3.17.1 | ✅ 已完成 |
+| S2 | 测试保护网 | 新增并稳定运行 18 个 API 测试 | ✅ 已完成 |
+| S3 | API 结构 | `hospital/api_views.py` 拆分到 `hospital/api/`，保留兼容导出层 | ✅ 已完成 |
+| S4 | 页面结构 | `hospital/views.py` 拆分到 `hospital/views/` 包 | ✅ 已完成 |
+| S5 | 查询/服务边界 | 新增 `hospital/selectors/` 和 `hospital/services/` | ✅ 已完成 |
+| S6 | 权限安全 | 接入 `IsPatient`、`IsDoctor`，补生产安全配置 | ✅ 已完成 |
+| S7 | 部署 | Docker 改为 Gunicorn，Compose 增加 PostgreSQL、volume、healthcheck | ✅ 已完成 |
+| S8 | 文档 | README、API 文档、架构、权限、部署、升级记录已同步 | ✅ 已完成 |

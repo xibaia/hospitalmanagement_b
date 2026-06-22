@@ -80,8 +80,7 @@ class PatientAuthAPITests(APITestCase):
             **auth_headers(doctor_user),
         )
 
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-        self.assertFalse(response.data["success"])
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
 
 class DoctorAuthAPITests(APITestCase):
@@ -107,4 +106,4 @@ class DoctorAuthAPITests(APITestCase):
         )
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-        self.assertFalse(response.data["success"])
+        self.assertIn("detail", response.data)

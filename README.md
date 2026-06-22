@@ -25,10 +25,24 @@ python manage.py migrate
 python manage.py runserver
 ```
 
-### **3. 使用 Docker (推荐生产环境)**
-如果你已经安装了 Docker，只需要执行：
+### **3. 使用 Docker Compose (推荐生产环境)**
+Docker Compose 会启动 Django + Gunicorn + PostgreSQL，并在 Web 容器启动时自动执行迁移和静态文件收集：
 ```bash
-docker-compose up --build
+cp .env.example .env
+# 按生产环境修改 .env，尤其是 SECRET_KEY / DEBUG / ALLOWED_HOSTS / DB_PASSWORD
+docker compose up --build
+```
+
+当前 `docker-compose.yml` 使用 PostgreSQL 16、Gunicorn 和持久化 volume：
+
+- `postgres_data`：PostgreSQL 数据
+- `static_volume`：`collectstatic` 输出
+- `media_volume`：用户上传文件
+
+如果本地 `.env` 中的 `SECRET_KEY` 包含 `$`，`docker compose config` 可能会显示变量插值警告。容器实际读取 `.env` 时已使用 raw 模式；需要做无警告配置检查时可执行：
+
+```bash
+COMPOSE_DISABLE_ENV_FILE=1 docker compose config
 ```
 
 ---
@@ -75,18 +89,45 @@ python manage.py runserver
 ### 数据库策略
 
 - **开发环境**：自动使用 SQLite，无需任何配置
-- **生产环境**：需安装 PostgreSQL，并在 `.env` 中设置：
+- **生产环境**：使用 PostgreSQL，并在 `.env` 中设置：
 
 ```bash
 DJANGO_ENV=production
+DEBUG=False
+ALLOWED_HOSTS=your-domain.com,127.0.0.1
 DB_NAME=oral_screening
 DB_USER=postgres
 DB_PASSWORD=your-password
-DB_HOST=localhost
+DB_HOST=db
 ```
 
 ### Python 版本
 推荐 Python 3.12。仓库根目录的 `.python-version` 已固定为 `3.12`。
+
+## ✅ 常用检查命令
+
+```bash
+source .venv/bin/activate
+python manage.py check
+python manage.py migrate --check
+python manage.py test
+python -m pip check
+python manage.py collectstatic --noinput --dry-run
+COMPOSE_DISABLE_ENV_FILE=1 docker compose config
+```
+
+当前自动化测试覆盖患者/医生登录、角色隔离、分页、活动报名、病历所有权和牙位校验等核心 API。
+
+## 📚 维护文档
+
+| 文档 | 用途 |
+|------|------|
+| `API_Documentation.md` | REST API 认证、路径、请求和响应说明 |
+| `docs/architecture.md` | 项目模块、视图/API 拆分结构 |
+| `docs/permissions.md` | 管理员、医生、患者权限边界 |
+| `docs/deployment.md` | 本地与 Docker/Gunicorn/PostgreSQL 部署步骤 |
+| `docs/upgrade-notes.md` | Python/Django/DRF 升级和兼容性记录 |
+| `docs/modernization-plan.md` | 技术栈现代化完整执行计划和记录 |
 
 ---
 
@@ -130,4 +171,4 @@ git branch --set-upstream-to=origin/main main
 
 ---
 
-（...哥哥，如果有任何启动不了的问题，随时呼唤我哦！我会一直守在代码旁边的～ 🌸💖）
+如果启动或部署遇到问题，优先查看 `TROUBLESHOOTING.md` 和 `docs/deployment.md`。

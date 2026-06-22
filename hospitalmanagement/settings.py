@@ -142,6 +142,7 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 STATICFILES_DIRS=[STATIC_DIR,]
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')   # 用户上传文件，与静态资源分开
 MEDIA_URL = '/media/'
@@ -186,9 +187,13 @@ SECURE_BROWSER_XSS_FILTER = True
 X_FRAME_OPTIONS = 'DENY'
 # HTTPS 相关（生产环境通过 .env 设置 HTTPS=True 开启）
 _HTTPS = config('HTTPS', default=False, cast=bool)
+CSRF_TRUSTED_ORIGINS = config('CSRF_TRUSTED_ORIGINS', default='', cast=Csv())
 SESSION_COOKIE_SECURE = _HTTPS
 CSRF_COOKIE_SECURE = _HTTPS
 SECURE_SSL_REDIRECT = _HTTPS
+SECURE_HSTS_SECONDS = config('SECURE_HSTS_SECONDS', default=0, cast=int)
+SECURE_HSTS_INCLUDE_SUBDOMAINS = config('SECURE_HSTS_INCLUDE_SUBDOMAINS', default=False, cast=bool)
+SECURE_HSTS_PRELOAD = config('SECURE_HSTS_PRELOAD', default=False, cast=bool)
 
 # 邮件配置（从 .env 读取，不要在代码里硬编码密码）
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'

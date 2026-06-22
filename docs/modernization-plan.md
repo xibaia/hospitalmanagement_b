@@ -1,7 +1,7 @@
 # 技术栈现代化与维护性改造计划
 
 > 创建时间：2026-06-22  
-> 当前状态：阶段 0-4 已完成，准备进入阶段 5  
+> 当前状态：阶段 0-8 已完成，等待最终提交
 > 适用项目：医院管理系统 / 口腔筛查管理后端  
 > 执行原则：先跑稳，再升级，再拆分；每个阶段都要可验证、可回滚。
 
@@ -11,7 +11,7 @@
 
 当前项目是一个 Django 医院管理系统，包含 Django 模板页面、Django REST Framework API、SQLite/PostgreSQL 数据库配置、PDF 生成、医生/患者/管理员多角色业务。
 
-当前识别到的主要技术栈：
+改造前识别到的主要技术栈：
 
 | 类型 | 当前情况 |
 |------|----------|
@@ -64,6 +64,8 @@
 | 数据库 | 开发 SQLite，生产 PostgreSQL |
 | 生产服务 | gunicorn + nginx |
 | 容器 | python:3.12-slim |
+
+本轮执行完成后，项目已实际运行在 Python 3.12、Django 5.2.15、DRF 3.17.1，并补齐 Gunicorn、PostgreSQL Compose、结构拆分、权限类和维护文档。
 
 选择 Python 3.12 的原因：
 
@@ -548,14 +550,14 @@ hospital/
 
 | 状态 | 任务 |
 |------|------|
-| [ ] | 先拆 `api_views.py` 中的患者 API |
-| [ ] | 拆医生 API |
-| [ ] | 拆活动 API |
-| [ ] | 拆病历 API |
-| [ ] | 拆站点 API |
-| [ ] | 再拆 `views.py` 中的 public/admin/doctor/patient 页面 |
-| [ ] | 将重复查询逻辑放入 `selectors/` |
-| [ ] | 将有副作用的业务操作放入 `services/` |
+| [x] | 先拆 `api_views.py` 中的患者 API |
+| [x] | 拆医生 API |
+| [x] | 拆活动 API |
+| [x] | 拆病历 API |
+| [x] | 拆站点 API |
+| [x] | 再拆 `views.py` 中的 public/admin/doctor/patient 页面 |
+| [x] | 将重复查询逻辑放入 `selectors/` |
+| [x] | 将有副作用的业务操作放入 `services/` |
 
 ### 10.3 拆分规则
 
@@ -572,6 +574,36 @@ hospital/
 - `views.py` 和 `api_views.py` 体积明显下降。
 - 新模块边界能从文件名直接看懂。
 
+### 10.5 执行记录（2026-06-22）
+
+结构拆分：
+
+| 范围 | 结果 |
+|------|------|
+| API | 新增 `hospital/api/` 包，按 patient/doctor/activity/medical_record/directory/station 拆分 |
+| API 兼容层 | `hospital/api_views.py` 保留为 re-export 层，`hospital/api_urls.py` 无需大改 |
+| 页面视图 | 删除原 `hospital/views.py`，新增 `hospital/views/` 包 |
+| 页面兼容层 | `hospital/views/__init__.py` 继续导出原函数名，根路由导入保持兼容 |
+| 查询封装 | 新增 `hospital/selectors/patient.py`、`hospital/selectors/medical_record.py` |
+| 服务封装 | 新增 `hospital/services/activity.py`，封装活动报名和取消报名 |
+
+拆分后体积：
+
+| 文件/目录 | 结果 |
+|-----------|------|
+| `hospital/api_views.py` | 约 25 行，作为兼容导出层 |
+| `hospital/api/` | 8 个源码文件 |
+| `hospital/views/` | 5 个业务源码文件 + `__init__.py` |
+
+验证结果：
+
+```bash
+python manage.py check
+python manage.py test
+```
+
+结果：系统检查通过，`18 tests` 全部通过。
+
 ---
 
 ## 11. 阶段 6：权限与安全加固
@@ -582,15 +614,15 @@ hospital/
 
 | 状态 | 任务 |
 |------|------|
-| [ ] | 统一角色判断函数或权限类 |
-| [ ] | 新增 `IsPatient` 权限 |
-| [ ] | 新增 `IsDoctor` 权限 |
-| [ ] | 新增 `IsRecordOwnerOrDoctor` 权限 |
-| [ ] | 检查患者只能看自己的病历 |
-| [ ] | 检查医生只能看自己负责/相关的病历 |
-| [ ] | 检查管理员页面全部需要管理员权限 |
-| [ ] | 检查敏感字段是否泄露 |
-| [ ] | 检查生产安全配置 |
+| [x] | 统一角色判断函数或权限类 |
+| [x] | 新增 `IsPatient` 权限 |
+| [x] | 新增 `IsDoctor` 权限 |
+| [x] | 新增 `IsRecordOwnerOrDoctor` 权限 |
+| [x] | 检查患者只能看自己的病历 |
+| [x] | 检查医生只能看自己负责/相关的病历 |
+| [x] | 检查管理员页面全部需要管理员权限 |
+| [x] | 检查敏感字段是否泄露 |
+| [x] | 检查生产安全配置 |
 
 ### 11.2 生产安全配置检查
 
@@ -610,6 +642,39 @@ hospital/
 - 高风险接口有测试覆盖。
 - 病历、手机号、身份证号等敏感数据不会越权暴露。
 
+### 11.4 执行记录（2026-06-22）
+
+权限代码：
+
+| 项目 | 结果 |
+|------|------|
+| `IsPatient` | 患者专属 API 已接入 |
+| `IsDoctor` | 医生专属 API 已接入 |
+| `IsRecordOwnerOrDoctor` | 已新增，后续迁移到 class-based API 时可直接复用 |
+| 医生装饰器 | `doctor_required` 继续负责获取并挂载 `request.doctor` |
+| 患者病历 | 查询限定为当前患者 |
+| 医生病历 | 查询限定为当前医生 |
+| 医生患者详情 | 只允许查看分配给自己或已有自己病历的患者 |
+
+安全配置：
+
+| 配置 | 结果 |
+|------|------|
+| `CSRF_TRUSTED_ORIGINS` | 已从环境变量读取 |
+| `SECURE_HSTS_SECONDS` | 已从环境变量读取 |
+| `SECURE_HSTS_INCLUDE_SUBDOMAINS` | 已从环境变量读取 |
+| `SECURE_HSTS_PRELOAD` | 已从环境变量读取 |
+| `.env.example` | 已同步安全配置字段 |
+
+验证结果：
+
+```bash
+python manage.py check
+python manage.py test
+```
+
+结果：系统检查通过，`18 tests` 全部通过。
+
 ---
 
 ## 12. 阶段 7：部署改造
@@ -620,13 +685,13 @@ hospital/
 
 | 状态 | 任务 |
 |------|------|
-| [ ] | Dockerfile 使用 Python 3.12 |
-| [ ] | 生产启动从 `runserver` 改为 `gunicorn` |
-| [ ] | docker-compose 增加 PostgreSQL 服务 |
-| [ ] | 增加 `collectstatic` 流程 |
-| [ ] | 明确 media 文件处理方式 |
-| [ ] | 增加健康检查 |
-| [ ] | 增加部署文档 |
+| [x] | Dockerfile 使用 Python 3.12 |
+| [x] | 生产启动从 `runserver` 改为 `gunicorn` |
+| [x] | docker-compose 增加 PostgreSQL 服务 |
+| [x] | 增加 `collectstatic` 流程 |
+| [x] | 明确 media 文件处理方式 |
+| [x] | 增加健康检查 |
+| [x] | 增加部署文档 |
 
 ### 12.2 建议生产命令
 
@@ -643,6 +708,36 @@ gunicorn hospitalmanagement.wsgi:application --bind 0.0.0.0:8000
 - 静态文件和上传文件处理方式明确。
 - README 或部署文档可以指导生产部署。
 
+### 12.4 执行记录（2026-06-22）
+
+部署改造：
+
+| 项目 | 结果 |
+|------|------|
+| `requirement.txt` | 新增 `gunicorn==23.0.0` |
+| `Dockerfile` | 基础镜像为 `python:3.12-slim`，默认 CMD 为 Gunicorn |
+| `docker-compose.yml` | 新增 PostgreSQL 16、web、volume、healthcheck |
+| `STATIC_ROOT` | 设置为 `staticfiles` |
+| `.gitignore` | 忽略 `staticfiles/` 和 `.codegraph/` |
+| 静态文件 | Web 容器启动时执行 `collectstatic --noinput` |
+| media 文件 | 使用 `media_volume:/app/media` 持久化 |
+
+Compose 注意事项：
+
+- Web 服务等待 PostgreSQL healthcheck 通过后启动。
+- `.env` 通过 raw 模式传入容器，避免 `SECRET_KEY` 中 `$` 被错误展开。
+- 本机如果有含 `$` 的 `.env`，直接执行 `docker compose config` 可能出现插值警告；可用 `COMPOSE_DISABLE_ENV_FILE=1 docker compose config` 做无警告配置检查。
+
+验证结果：
+
+```bash
+python manage.py collectstatic --noinput --dry-run
+python -m pip check
+COMPOSE_DISABLE_ENV_FILE=1 docker compose config
+```
+
+结果：静态文件收集流程可执行，依赖检查通过，Compose 配置可解析。
+
 ---
 
 ## 13. 阶段 8：文档收尾
@@ -653,19 +748,31 @@ gunicorn hospitalmanagement.wsgi:application --bind 0.0.0.0:8000
 
 | 状态 | 文档 | 说明 |
 |------|------|------|
-| [ ] | `README.md` | 启动、测试、部署入口 |
-| [ ] | `API_Documentation.md` | API 认证、参数、响应示例 |
-| [ ] | `docs/architecture.md` | 模块结构说明 |
-| [ ] | `docs/permissions.md` | 角色权限表 |
-| [ ] | `docs/deployment.md` | 部署步骤 |
-| [ ] | `docs/upgrade-notes.md` | 升级过程和兼容性记录 |
-| [ ] | `PROGRESS.md` | 已知问题修复状态同步 |
+| [x] | `README.md` | 启动、测试、部署入口 |
+| [x] | `API_Documentation.md` | API 认证、参数、响应示例 |
+| [x] | `docs/architecture.md` | 模块结构说明 |
+| [x] | `docs/permissions.md` | 角色权限表 |
+| [x] | `docs/deployment.md` | 部署步骤 |
+| [x] | `docs/upgrade-notes.md` | 升级过程和兼容性记录 |
+| [x] | `PROGRESS.md` | 已知问题修复状态同步 |
 
 ### 13.2 验收标准
 
 - 文档与真实代码一致。
 - 新人能按 README 启动项目。
 - 维护者能从文档知道权限、接口、部署方式。
+
+### 13.3 执行记录（2026-06-22）
+
+| 文档 | 结果 |
+|------|------|
+| `README.md` | 补充 Docker Compose、Gunicorn、PostgreSQL、检查命令和文档索引 |
+| `API_Documentation.md` | 更新时间、分页约定、患者/医生 Token 权限和病历边界 |
+| `docs/architecture.md` | 记录模块边界、请求入口、API/页面拆分、selectors/services |
+| `docs/permissions.md` | 记录角色、API 权限类、病历可见范围和生产安全配置 |
+| `docs/deployment.md` | 记录本地、Docker、Gunicorn、静态/media、健康检查和 `.env` 注意事项 |
+| `docs/upgrade-notes.md` | 记录版本变化、兼容性处理、验证命令和后续建议 |
+| `PROGRESS.md` | 同步技术栈现代化阶段状态 |
 
 ---
 
@@ -713,16 +820,24 @@ gunicorn hospitalmanagement.wsgi:application --bind 0.0.0.0:8000
 
 ---
 
-## 16. 当前下一步
+## 16. 当前状态与后续建议
 
-从这里开始执行：
+本计划阶段 0-8 已完成，当前分支为 `chore/modernize-stack`。
 
-1. 确认是否已有虚拟环境或 Python 3.12。
-2. 创建 `chore/modernize-stack` 分支。
-3. 备份数据库。
-4. 创建 Python 3.12 虚拟环境。
-5. 安装当前依赖。
-6. 跑通 `python manage.py check`。
-7. 记录基线结果。
+最终验证命令：
 
-执行完阶段 0 后，再决定是先补测试，还是先解决当前环境里的依赖兼容问题。
+```bash
+python manage.py check
+python manage.py migrate --check
+python manage.py test
+python -m pip check
+python manage.py collectstatic --noinput --dry-run
+COMPOSE_DISABLE_ENV_FILE=1 docker compose config
+```
+
+后续建议：
+
+1. 生产上线前补 Nginx、HTTPS、日志轮转和数据库/媒体文件备份策略。
+2. 继续把历史页面视图中的复杂查询迁移到 `selectors/`。
+3. 如果 API 规模继续扩大，再考虑将 function-based API 迁移到 class-based API 或 ViewSet。
+4. 每次新增角色边界、病历或患者隐私字段时，优先补权限测试。

@@ -1,6 +1,6 @@
 # 医院管理系统 API 接口文档
 
-> 更新时间：2026-03-22 | 版本：v2.0（含医生端、病历、活动、站点全部接口）
+> 更新时间：2026-06-22 | 版本：v2.1（含分页、角色权限和病历所有权约束）
 
 ## 基础信息
 
@@ -11,6 +11,22 @@
 | 认证方式 | Token Authentication |
 | 请求头格式 | `Authorization: Token <token>` |
 | 响应格式 | JSON，统一包裹 `{"success": bool, "data": ..., "message": "..."}` |
+
+### 分页约定
+
+列表接口默认每页 20 条，分页响应会额外返回：
+
+```json
+{
+    "success": true,
+    "count": 42,
+    "next": "http://127.0.0.1:8000/api/doctors/?page=2",
+    "previous": null,
+    "data": []
+}
+```
+
+支持分页的主要接口包括医生目录、患者病历、医生患者列表、医生病历、活动列表、我的活动和站点列表。
 
 ---
 
@@ -49,10 +65,10 @@
 ```
 
 ### 4. 获取患者信息
-`GET /api/patient/info/` — 需 Token
+`GET /api/patient/info/` — 需患者 Token
 
 ### 5. 更新患者信息
-`PUT /api/patient/update/` — 需 Token
+`PUT /api/patient/update/` — 需患者 Token
 
 ```json
 // 请求（字段均可选）
@@ -60,7 +76,7 @@
 ```
 
 ### 6. 绑定医生（扫码）
-`POST /api/patient/bind-doctor/` — 需 Token
+`POST /api/patient/bind-doctor/` — 需患者 Token
 
 ```json
 // 请求
@@ -70,14 +86,14 @@
 ```
 
 ### 7. 病历列表
-`GET /api/patient/records/` — 需 Token
+`GET /api/patient/records/` — 需患者 Token，只返回当前患者病历
 
 ### 8. 病历详情
-`GET /api/patient/records/<pk>/` — 需 Token
+`GET /api/patient/records/<pk>/` — 需患者 Token，只能查看当前患者病历
 
 ### 9. 既往病史（查看/更新）
-`GET /api/patient/medical-history/` — 需 Token
-`PUT /api/patient/medical-history/` — 需 Token
+`GET /api/patient/medical-history/` — 需患者 Token
+`PUT /api/patient/medical-history/` — 需患者 Token
 
 ```json
 // PUT 请求（字段均可选）
@@ -124,7 +140,7 @@
 
 ### 5. 病历列表 / 创建病历
 `GET /api/doctor/records/` — 查看自己负责的病历，支持 `?activity_id=` 过滤
-`POST /api/doctor/records/` — 创建病历
+`POST /api/doctor/records/` — 创建病历，只允许为分配给自己或已有自己病历的患者创建
 
 ```json
 // POST 请求
@@ -138,6 +154,7 @@
 ### 6. 病历详情 / 更新
 `GET /api/doctor/records/<pk>/` — 查看
 `PUT /api/doctor/records/<pk>/` — 更新（已确认的不可修改）
+> 只能操作当前医生自己的病历，更新时不能修改病历所属患者。
 
 ### 7. 确认病历
 `POST /api/doctor/records/<pk>/confirm/` — 需 Token（医生）
@@ -208,3 +225,4 @@
 5. 病历一旦医生确认（`doctor_confirmed=true`），不允许再修改
 6. 义诊活动仅 `status=active` 时才可报名
 7. 生产部署时将 `127.0.0.1:8000` 替换为实际域名，并在 `.env` 配置 `CORS_ALLOWED_ORIGINS`
+8. 患者 token 不能访问医生专属接口，医生 token 不能访问患者专属接口

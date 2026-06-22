@@ -6,3 +6,4 @@ djangorestframework==3.17.1
 python-decouple==3.8
 psycopg2-binary==2.9.9
 django-cors-headers==4.9.0
+gunicorn==23.0.0
