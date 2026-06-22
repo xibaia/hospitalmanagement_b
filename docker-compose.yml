@@ -1,10 +1,10 @@
 services:
   db:
     image: postgres:16-alpine
-    environment:
-      POSTGRES_DB: ${DB_NAME:-oral_screening}
-      POSTGRES_USER: ${DB_USER:-postgres}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+    env_file:
+      - path: .env
+        required: false
+        format: raw
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -37,7 +37,7 @@ services:
     ports:
       - "8000:8000"
     healthcheck:
-      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/', timeout=5)\""]
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/healthz', timeout=5)\""]
       interval: 30s
       timeout: 10s
       retries: 3

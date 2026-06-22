@@ -37,11 +37,16 @@ DJANGO_ENV=production
 DEBUG=False
 SECRET_KEY=replace-with-a-strong-secret
 ALLOWED_HOSTS=your-domain.com,127.0.0.1
+HTTPS=True
+TRUST_X_FORWARDED_PROTO=True
 DB_NAME=oral_screening
 DB_USER=postgres
 DB_PASSWORD=replace-with-a-strong-password
 DB_HOST=db
 DB_PORT=5432
+POSTGRES_DB=oral_screening
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=replace-with-a-strong-password
 ```
 
 3. 启动：
@@ -104,7 +109,7 @@ COMPOSE_DISABLE_ENV_FILE=1 docker compose config
 
 Docker Compose 会自动读取项目根目录 `.env` 做变量插值。如果 `SECRET_KEY` 含 `$`，`docker compose config` 可能提示未设置变量。
 
-当前 compose 已用 raw 模式把 `.env` 传给容器，避免容器内密钥被错误展开。做配置语法检查时，推荐使用：
+当前 compose 已用 raw 模式把 `.env` 传给 Web 和 PostgreSQL 容器，避免 `SECRET_KEY`、`DB_PASSWORD`、`POSTGRES_PASSWORD` 中的 `$` 被错误展开。做配置语法检查时，推荐使用：
 
 ```bash
 COMPOSE_DISABLE_ENV_FILE=1 docker compose config
@@ -117,4 +122,5 @@ COMPOSE_DISABLE_ENV_FILE=1 docker compose config
 - `SECRET_KEY` 不要复用示例值
 - `CORS_ALLOW_ALL_ORIGINS=False`
 - 使用 HTTPS 后再设置 `HTTPS=True`
+- 只有在可信反向代理转发 `X-Forwarded-Proto` 时，才设置 `TRUST_X_FORWARDED_PROTO=True`
 - 确认 `media_volume` 和数据库有备份策略

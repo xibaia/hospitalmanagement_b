@@ -79,6 +79,7 @@
 | `CORS_ALLOW_ALL_ORIGINS` | `False` |
 | `CORS_ALLOWED_ORIGINS` | 只配置可信前端来源 |
 | `HTTPS` | 有 HTTPS 代理时设为 `True` |
+| `TRUST_X_FORWARDED_PROTO` | 可信反向代理终止 HTTPS 时设为 `True` |
 | `CSRF_TRUSTED_ORIGINS` | 配置可信 HTTPS 域名 |
 | `SECURE_HSTS_SECONDS` | HTTPS 稳定后再开启 |
 

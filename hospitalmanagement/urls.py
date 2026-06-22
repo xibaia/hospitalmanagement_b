@@ -23,6 +23,7 @@ from django.http import HttpResponse
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('',views.home_view,name=''),
+    path('healthz', lambda request: HttpResponse('ok', content_type='text/plain')),
     # Stub Vite client to avoid 404s when browser or IDE injects HMR client
     path('@vite/client', lambda request: HttpResponse("/* Vite client disabled */ export {};", content_type='application/javascript')),
 

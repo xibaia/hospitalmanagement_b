@@ -35,7 +35,7 @@
 | DRF authtoken 新迁移 | 执行 `authtoken.0004_alter_tokenproxy_options` |
 | DRF 分页配置没有统一响应 | 新增 `paginated_response`，列表接口返回 `count/next/previous` |
 | PDF 中文乱码 | `xhtml2pdf` 输入编码改为 UTF-8 |
-| Compose 中密钥含 `$` 的插值警告 | `env_file` 使用 raw 模式，文档补充检查方式 |
+| Compose 中密钥/数据库密码含 `$` 的插值警告 | `env_file` 使用 raw 模式，文档补充检查方式 |
 
 ## 验证记录
 

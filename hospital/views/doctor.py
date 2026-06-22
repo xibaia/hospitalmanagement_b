@@ -67,7 +67,7 @@ def doctor_qrcode_view(request):
         qr.add_data(qr_text)
         qr.make(fit=True)
         img = qr.make_image(fill_color="black", back_color="white")
-        
+
         buffer = BytesIO()
         img.save(buffer, format='PNG')
         img_base64 = base64.b64encode(buffer.getvalue()).decode('utf-8')

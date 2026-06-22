@@ -340,7 +340,7 @@ class ActivityDetailSerializer(serializers.ModelSerializer):
     """
     leader_name = serializers.SerializerMethodField()
     status_display = serializers.CharField(source='get_status_display', read_only=True)
-    participants = ActivityParticipantSerializer(many=True, read_only=True)
+    participants = ActivityParticipantSerializer(source='activityparticipant_set', many=True, read_only=True)
     # 由 view 层 annotate 注入，与 ActivityListSerializer 保持一致，不额外查询
     participant_count = serializers.IntegerField(read_only=True)
     is_joined = serializers.SerializerMethodField()
@@ -366,7 +366,7 @@ class ActivityDetailSerializer(serializers.ModelSerializer):
         cache_attr = f'_act_part_{obj.pk}'
         if not hasattr(request, cache_attr):
             setattr(request, cache_attr,
-                    obj.participants.filter(user=request.user).first())
+                    obj.activityparticipant_set.filter(user=request.user).first())
         return getattr(request, cache_attr)
 
     def get_is_joined(self, obj):

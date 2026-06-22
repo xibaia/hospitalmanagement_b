@@ -29,7 +29,7 @@ python manage.py runserver
 Docker Compose 会启动 Django + Gunicorn + PostgreSQL，并在 Web 容器启动时自动执行迁移和静态文件收集：
 ```bash
 cp .env.example .env
-# 按生产环境修改 .env，尤其是 SECRET_KEY / DEBUG / ALLOWED_HOSTS / DB_PASSWORD
+# 按生产环境修改 .env，尤其是 SECRET_KEY / DEBUG / ALLOWED_HOSTS / DB_PASSWORD / POSTGRES_PASSWORD
 docker compose up --build
 ```
 
@@ -39,7 +39,7 @@ docker compose up --build
 - `static_volume`：`collectstatic` 输出
 - `media_volume`：用户上传文件
 
-如果本地 `.env` 中的 `SECRET_KEY` 包含 `$`，`docker compose config` 可能会显示变量插值警告。容器实际读取 `.env` 时已使用 raw 模式；需要做无警告配置检查时可执行：
+如果本地 `.env` 中的 `SECRET_KEY`、`DB_PASSWORD` 或 `POSTGRES_PASSWORD` 包含 `$`，`docker compose config` 可能会显示变量插值警告。容器实际读取 `.env` 时已使用 raw 模式；需要做无警告配置检查时可执行：
 
 ```bash
 COMPOSE_DISABLE_ENV_FILE=1 docker compose config
@@ -79,9 +79,13 @@ python manage.py runserver
 | `DB_PASSWORD` | _(空)_ | PostgreSQL 密码 |
 | `DB_HOST` | `localhost` | PostgreSQL 主机 |
 | `DB_PORT` | `5432` | PostgreSQL 端口 |
+| `POSTGRES_DB` | `oral_screening` | Docker Compose 初始化 PostgreSQL 数据库名 |
+| `POSTGRES_USER` | `postgres` | Docker Compose 初始化 PostgreSQL 用户名 |
+| `POSTGRES_PASSWORD` | _(空)_ | Docker Compose 初始化 PostgreSQL 密码 |
 | `CORS_ALLOW_ALL_ORIGINS` | `False` | 是否允许所有跨域来源 |
 | `CORS_ALLOWED_ORIGINS` | _(空)_ | 允许跨域访问 API 的来源列表 |
 | `HTTPS` | `False` | 生产环境开启 HTTPS 安全 Cookie 和重定向 |
+| `TRUST_X_FORWARDED_PROTO` | `False` | 反向代理终止 HTTPS 时设为 `True` |
 | `EMAIL_HOST_USER` | _(空)_ | SMTP 发件账号 |
 | `EMAIL_HOST_PASSWORD` | _(空)_ | SMTP 发件密码 |
 | `EMAIL_RECEIVING_USER` | _(空)_ | 联系表单收件人列表 |
@@ -99,6 +103,9 @@ DB_NAME=oral_screening
 DB_USER=postgres
 DB_PASSWORD=your-password
 DB_HOST=db
+POSTGRES_DB=oral_screening
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=your-password
 ```
 
 ### Python 版本

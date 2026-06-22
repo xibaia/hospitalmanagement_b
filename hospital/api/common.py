@@ -10,6 +10,8 @@ from hospital.models import ActivityParticipant, Doctor
 
 ROLE_DOCTOR = 'DOCTOR'
 ROLE_PATIENT = 'PATIENT'
+
+
 def paginated_response(request, queryset, serializer_class, context=None, message=None):
     paginator = PageNumberPagination()
     page = paginator.paginate_queryset(queryset, request)
@@ -36,7 +38,7 @@ def user_is_patient(user):
 
 def activity_annotate(user):
     return {
-        'participant_count': Count('participants', distinct=True),
+        'participant_count': Count('activityparticipant', distinct=True),
         'is_joined': Exists(
             ActivityParticipant.objects.filter(
                 activity=OuterRef('pk'),

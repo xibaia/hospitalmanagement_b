@@ -1,8 +1,8 @@
 # 技术栈现代化与维护性改造计划
 
-> 创建时间：2026-06-22  
+> 创建时间：2026-06-22
 > 当前状态：阶段 0-8 已完成，等待最终提交
-> 适用项目：医院管理系统 / 口腔筛查管理后端  
+> 适用项目：医院管理系统 / 口腔筛查管理后端
 > 执行原则：先跑稳，再升级，再拆分；每个阶段都要可验证、可回滚。
 
 ---
@@ -725,7 +725,7 @@ gunicorn hospitalmanagement.wsgi:application --bind 0.0.0.0:8000
 Compose 注意事项：
 
 - Web 服务等待 PostgreSQL healthcheck 通过后启动。
-- `.env` 通过 raw 模式传入容器，避免 `SECRET_KEY` 中 `$` 被错误展开。
+- `.env` 通过 raw 模式传入 Web 和 PostgreSQL 容器，避免 `SECRET_KEY`、`DB_PASSWORD`、`POSTGRES_PASSWORD` 中 `$` 被错误展开。
 - 本机如果有含 `$` 的 `.env`，直接执行 `docker compose config` 可能出现插值警告；可用 `COMPOSE_DISABLE_ENV_FILE=1 docker compose config` 做无警告配置检查。
 
 验证结果：
