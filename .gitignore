@@ -4,6 +4,7 @@
 *.pyc
 __pycache__
 db.sqlite3
+db.sqlite3.backup.*
 media
 
 # Backup files #
@@ -66,9 +67,6 @@ coverage.xml
 # Jupyter Notebook
 .ipynb_checkpoints
 
-# pyenv
-.python-version
-
 # celery
 celerybeat-schedule.*
 
@@ -79,6 +77,7 @@ celerybeat-schedule.*
 .env
 # 保留模板，忽略实际配置
 !.env.example
+.uv-python/
 .venv
 env/
 venv/

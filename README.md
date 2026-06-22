@@ -10,9 +10,19 @@
 直接双击根目录下的 `run.bat` 文件。它会自动帮你安装依赖、迁移数据库并启动服务器。
 
 ### **2. macOS / Linux**
-在终端执行以下命令：
+推荐使用 Python 3.12。安装好 Python 3.12 后，在终端执行：
 ```bash
 ./run.sh
+```
+
+如果本机没有 `python3.12`，可以先用 `uv` 安装项目专用 Python：
+```bash
+uv python install 3.12 --install-dir .uv-python
+UV_PYTHON_INSTALL_DIR=.uv-python uv venv --python 3.12 .venv
+source .venv/bin/activate
+python -m pip install -r requirement.txt
+python manage.py migrate
+python manage.py runserver
 ```
 
 ### **3. 使用 Docker (推荐生产环境)**
@@ -35,7 +45,9 @@ docker-compose up --build
 
 ```bash
 cp .env.example .env   # 复制配置模板
-pip install -r requirement.txt
+python3.12 -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirement.txt
 python manage.py migrate
 python manage.py runserver
 ```
@@ -53,6 +65,12 @@ python manage.py runserver
 | `DB_PASSWORD` | _(空)_ | PostgreSQL 密码 |
 | `DB_HOST` | `localhost` | PostgreSQL 主机 |
 | `DB_PORT` | `5432` | PostgreSQL 端口 |
+| `CORS_ALLOW_ALL_ORIGINS` | `False` | 是否允许所有跨域来源 |
+| `CORS_ALLOWED_ORIGINS` | _(空)_ | 允许跨域访问 API 的来源列表 |
+| `HTTPS` | `False` | 生产环境开启 HTTPS 安全 Cookie 和重定向 |
+| `EMAIL_HOST_USER` | _(空)_ | SMTP 发件账号 |
+| `EMAIL_HOST_PASSWORD` | _(空)_ | SMTP 发件密码 |
+| `EMAIL_RECEIVING_USER` | _(空)_ | 联系表单收件人列表 |
 
 ### 数据库策略
 
@@ -68,7 +86,7 @@ DB_HOST=localhost
 ```
 
 ### Python 版本
-推荐 Python 3.9+。
+推荐 Python 3.12。仓库根目录的 `.python-version` 已固定为 `3.12`。
 
 ---
 

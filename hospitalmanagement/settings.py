@@ -177,6 +177,7 @@ LOGIN_REDIRECT_URL='/afterlogin'
 # CORS 配置（微信小程序跨域访问 /api/ 接口）
 # 生产环境 .env 中设置 CORS_ALLOW_ALL_ORIGINS=False，并配置 CORS_ALLOWED_ORIGINS
 CORS_ALLOW_ALL_ORIGINS = config('CORS_ALLOW_ALL_ORIGINS', default=False, cast=bool)
+CORS_ALLOWED_ORIGINS = config('CORS_ALLOWED_ORIGINS', default='', cast=Csv())
 CORS_URLS_REGEX = r'^/api/.*$'   # 只对 API 路径开放跨域，Web UI 不受影响
 
 # 安全响应头（生产环境必须开启）

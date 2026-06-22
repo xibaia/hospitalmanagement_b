@@ -1,23 +1,34 @@
 #!/bin/bash
 
-# 检查是否安装了 python3
-if ! command -v python3 &> /dev/null
+# 检查是否安装了 Python 3.12
+PYTHON_BIN="${PYTHON_BIN:-python3.12}"
+
+if ! command -v "$PYTHON_BIN" &> /dev/null
 then
-    echo "未找到 python3，请先安装 Python。"
-    exit
+    PROJECT_PYTHON="$(find .uv-python -name python3.12 -type f 2>/dev/null | head -n 1)"
+    if [ -n "$PROJECT_PYTHON" ]; then
+        PYTHON_BIN="$PROJECT_PYTHON"
+    fi
 fi
 
-# 激活虚拟环境
-if [ -d "venv" ]; then
-    echo "正在激活虚拟环境..."
-    source venv/bin/activate 2>/dev/null || source venv/Scripts/activate 2>/dev/null
+if ! command -v "$PYTHON_BIN" &> /dev/null && [ ! -x "$PYTHON_BIN" ]
+then
+    echo "未找到 Python 3.12，请先安装 Python 3.12，或通过 PYTHON_BIN 指定解释器。"
+    exit 1
 fi
+
+if [ ! -d ".venv" ]; then
+    echo "正在创建虚拟环境..."
+    "$PYTHON_BIN" -m venv .venv
+fi
+
+echo "正在激活虚拟环境..."
+source .venv/bin/activate
 
 echo "正在安装依赖..."
-pip install -r requirement.txt
+python -m pip install -r requirement.txt
 
 echo "正在应用数据库迁移..."
-python manage.py makemigrations
 python manage.py migrate
 
 echo "正在启动服务器..."

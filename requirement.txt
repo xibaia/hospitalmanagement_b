@@ -1,8 +1,8 @@
 xhtml2pdf
-Django==4.2.11
-django-widget-tweaks==1.4.12
+Django==5.2.15
+django-widget-tweaks==1.5.1
 sqlparse==0.4.4
-djangorestframework==3.14.0
+djangorestframework==3.17.1
 python-decouple==3.8
 psycopg2-binary==2.9.9
 django-cors-headers==4.9.0
