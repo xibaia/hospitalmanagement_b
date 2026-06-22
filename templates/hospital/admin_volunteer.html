@@ -19,8 +19,14 @@
           <td>{{ v.mobile }}</td>
           <td>{{ v.joined_date }}</td>
           <td>
-            <a href="{% url 'approve-volunteer' v.id %}" class="btn btn-success btn-xs">通过</a>
-            <a href="{% url 'reject-volunteer' v.id %}" class="btn btn-danger btn-xs" onclick="return confirm('拒绝并删除账号？')">拒绝</a>
+            <form method="post" action="{% url 'approve-volunteer' v.id %}" style="display:inline;">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-success btn-xs">通过</button>
+            </form>
+            <form method="post" action="{% url 'reject-volunteer' v.id %}" style="display:inline;">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-danger btn-xs" onclick="return confirm('拒绝并删除账号？')">拒绝</button>
+            </form>
           </td>
         </tr>
         {% endfor %}

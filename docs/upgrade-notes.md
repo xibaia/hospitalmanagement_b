@@ -16,7 +16,7 @@
 ## 主要改造
 
 1. 建立 Python 3.12 虚拟环境和 `.python-version`。
-2. 新增 API 测试保护网，当前 18 个测试通过。
+2. 新增 API/Web 测试保护网，当前 28 个测试通过。
 3. 升级 Django 到 5.2 LTS，DRF 到 3.17.1。
 4. 修复分页、病历所有权、牙位校验、PDF UTF-8、N+1 查询等问题。
 5. 拆分 `hospital/api_views.py` 到 `hospital/api/`。
@@ -36,6 +36,11 @@
 | DRF 分页配置没有统一响应 | 新增 `paginated_response`，列表接口返回 `count/next/previous` |
 | PDF 中文乱码 | `xhtml2pdf` 输入编码改为 UTF-8 |
 | Compose 中密钥/数据库密码含 `$` 的插值警告 | `env_file` 使用 raw 模式，文档补充检查方式 |
+| 活动列表/详情反向关系错误 | 使用 Django 默认 `activityparticipant` / `activityparticipant_set`，并补活动列表/详情测试 |
+| HTTPS 重定向影响容器健康检查 | 新增 `/healthz`，并将 healthcheck 改为访问该路径 |
+| 未审批账号绕过 Web 页面和活动医生权限 | Web 角色判断和活动医生判断都改为校验业务审批状态 |
+| 管理端 POST guard 与模板 GET 链接不匹配 | 审批、拒绝、删除按钮改为带 CSRF 的 POST 表单 |
+| 医生确认病历控件无效 | `MedicalRecordForm` 增加 `doctor_confirmed`，Web 更新时写入首次确认时间 |
 
 ## 验证记录
 
@@ -54,7 +59,7 @@ COMPOSE_DISABLE_ENV_FILE=1 docker compose config
 
 - Django system check 通过。
 - 迁移检查通过。
-- `18 tests` 全部通过。
+- `28 tests` 全部通过。
 - `pip check` 无 broken requirements。
 - Compose 配置可解析。
 

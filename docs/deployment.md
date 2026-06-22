@@ -78,7 +78,7 @@ gunicorn hospitalmanagement.wsgi:application --bind 0.0.0.0:8000
 `docker-compose.yml` 已配置：
 
 - PostgreSQL：`pg_isready`
-- Web：访问 `http://127.0.0.1:8000/`
+- Web：访问 `http://127.0.0.1:8000/healthz`
 
 Web 服务会等待数据库健康后再启动迁移和 Gunicorn。
 
@@ -107,7 +107,7 @@ COMPOSE_DISABLE_ENV_FILE=1 docker compose config
 
 ## `.env` 与 `$` 字符
 
-Docker Compose 会自动读取项目根目录 `.env` 做变量插值。如果 `SECRET_KEY` 含 `$`，`docker compose config` 可能提示未设置变量。
+Docker Compose 会自动读取项目根目录 `.env` 做变量插值。如果 `SECRET_KEY`、`DB_PASSWORD` 或 `POSTGRES_PASSWORD` 含 `$`，`docker compose config` 可能提示未设置变量。
 
 当前 compose 已用 raw 模式把 `.env` 传给 Web 和 PostgreSQL 容器，避免 `SECRET_KEY`、`DB_PASSWORD`、`POSTGRES_PASSWORD` 中的 `$` 被错误展开。做配置语法检查时，推荐使用：
 

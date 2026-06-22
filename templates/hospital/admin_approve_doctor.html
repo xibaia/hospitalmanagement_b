@@ -51,8 +51,18 @@ facebook : fb.com/sumit.luv
         <td>{{d.mobile}}</td>
         <td>{{d.address}}</td>
         <td>{{d.department}}</td>
-        <td><a class="btn btn-primary btn-xs" href="{% url 'approve-doctor' d.id  %}"><span class="glyphicon glyphicon-ok"></span></a></td>
-        <td><a class="btn btn-danger btn-xs" href="{% url 'reject-doctor' d.id  %}"><span class="glyphicon glyphicon-trash"></span></a></td>
+        <td>
+          <form method="post" action="{% url 'approve-doctor' d.id %}" style="display:inline;">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-primary btn-xs"><span class="glyphicon glyphicon-ok"></span></button>
+          </form>
+        </td>
+        <td>
+          <form method="post" action="{% url 'reject-doctor' d.id %}" style="display:inline;">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger btn-xs"><span class="glyphicon glyphicon-trash"></span></button>
+          </form>
+        </td>
       </tr>
       {% endfor %}
     </table>

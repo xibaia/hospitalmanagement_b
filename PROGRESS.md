@@ -96,7 +96,7 @@
 | # | 范围 | 结果 | 状态 |
 |---|------|------|------|
 | S1 | Python / Django / DRF | 统一到 Python 3.12、Django 5.2.15、DRF 3.17.1 | ✅ 已完成 |
-| S2 | 测试保护网 | 新增并稳定运行 18 个 API 测试 | ✅ 已完成 |
+| S2 | 测试保护网 | 新增并稳定运行 28 个 API/Web 测试 | ✅ 已完成 |
 | S3 | API 结构 | `hospital/api_views.py` 拆分到 `hospital/api/`，保留兼容导出层 | ✅ 已完成 |
 | S4 | 页面结构 | `hospital/views.py` 拆分到 `hospital/views/` 包 | ✅ 已完成 |
 | S5 | 查询/服务边界 | 新增 `hospital/selectors/` 和 `hospital/services/` | ✅ 已完成 |

@@ -121,6 +121,7 @@ class MedicalRecordForm(forms.ModelForm):
             'face_symmetry', 'has_swelling', 'mouth_opening',
             'extraoral_note', 'has_periodontal', 'mucosa_normal',
             'mucosa_note', 'intraoral_note', 'diagnosis',
+            'doctor_confirmed',
         ]
         widgets = {
             'check_date': forms.DateInput(attrs={'type': 'date'}),

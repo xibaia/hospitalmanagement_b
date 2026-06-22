@@ -1,7 +1,7 @@
 # 技术栈现代化与维护性改造计划
 
 > 创建时间：2026-06-22
-> 当前状态：阶段 0-8 已完成，等待最终提交
+> 当前状态：阶段 0-8 已完成，review 修复已完成
 > 适用项目：医院管理系统 / 口腔筛查管理后端
 > 执行原则：先跑稳，再升级，再拆分；每个阶段都要可验证、可回滚。
 
@@ -508,7 +508,7 @@ python manage.py test
 python -m pip check
 ```
 
-结果：`18 tests` 全部通过，无 broken requirements。
+结果：测试全部通过，无 broken requirements。最终复核时自动化测试总数为 `28 tests`。
 
 ---
 
@@ -602,7 +602,7 @@ python manage.py check
 python manage.py test
 ```
 
-结果：系统检查通过，`18 tests` 全部通过。
+结果：系统检查通过，自动化测试全部通过。最终复核时测试总数为 `28 tests`。
 
 ---
 
@@ -673,7 +673,7 @@ python manage.py check
 python manage.py test
 ```
 
-结果：系统检查通过，`18 tests` 全部通过。
+结果：系统检查通过，自动化测试全部通过。最终复核时测试总数为 `28 tests`。
 
 ---
 
@@ -773,6 +773,17 @@ COMPOSE_DISABLE_ENV_FILE=1 docker compose config
 | `docs/deployment.md` | 记录本地、Docker、Gunicorn、静态/media、健康检查和 `.env` 注意事项 |
 | `docs/upgrade-notes.md` | 记录版本变化、兼容性处理、验证命令和后续建议 |
 | `PROGRESS.md` | 同步技术栈现代化阶段状态 |
+
+### 13.4 Review 修复记录（2026-06-22）
+
+| 问题 | 修复 |
+|------|------|
+| 活动列表/详情接口使用不存在的 `participants` 反向关系 | 改为 Django 默认 `activityparticipant` / `activityparticipant_set` |
+| 活动列表/详情缺测试覆盖 | 补充活动列表、患者活动详情、医生活动详情测试 |
+| PostgreSQL 容器密码含 `$` 时可能被 Compose 插值截断 | PostgreSQL 容器也改为 raw `env_file`，补充 `POSTGRES_*` 配置 |
+| HTTPS 重定向可能影响容器健康检查 | 新增 `/healthz`，Web healthcheck 改为访问 `/healthz` |
+| `X-Forwarded-Proto` 信任边界不够明确 | 新增 `TRUST_X_FORWARDED_PROTO`，仅显式开启时信任代理头 |
+| 文档仍记录旧测试数和旧健康检查路径 | 同步更新 README、部署、升级、进度和本计划文档 |
 
 ---
 

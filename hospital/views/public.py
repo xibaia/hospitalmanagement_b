@@ -5,7 +5,7 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import redirect, render
 
 from hospital import forms, models
-from .common import is_admin, is_doctor, is_patient
+from .common import has_doctor_role, has_patient_role, is_admin, is_doctor, is_patient
 
 
 def home_view(request):
@@ -101,18 +101,14 @@ def patient_signup_view(request):
 def afterlogin_view(request):
     if is_admin(request.user):
         return redirect('admin-dashboard')
-    elif is_doctor(request.user):
-        accountapproval=models.Doctor.objects.all().filter(user_id=request.user.id,status=True)
-        if accountapproval:
+    elif has_doctor_role(request.user):
+        if is_doctor(request.user):
             return redirect('doctor-dashboard')
-        else:
-            return render(request,'hospital/doctor_wait_for_approval.html')
-    elif is_patient(request.user):
-        accountapproval=models.Patient.objects.all().filter(user_id=request.user.id,status=True)
-        if accountapproval:
+        return render(request,'hospital/doctor_wait_for_approval.html')
+    elif has_patient_role(request.user):
+        if is_patient(request.user):
             return redirect('patient-dashboard')
-        else:
-            return render(request,'hospital/patient_wait_for_approval.html')
+        return render(request,'hospital/patient_wait_for_approval.html')
     else:
         # 如果用户不属于任何角色，登出用户并重定向到首页
         from django.contrib.auth import logout

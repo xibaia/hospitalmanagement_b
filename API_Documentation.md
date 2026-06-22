@@ -170,19 +170,19 @@
 ### 1. 活动列表
 `GET /api/activities/` — 需 Token
 - 患者：只返回 `status=active` 的活动
-- 医生：返回全部（含草稿、已结束）
+- 已审批医生：返回全部（含草稿、已结束）
 
 ### 2. 活动详情
 `GET /api/activities/<pk>/` — 需 Token
 - 患者：不返回参与者名单，只返回人数
-- 医生：返回完整参与者名单
+- 已审批医生：返回完整参与者名单
 
 ### 3. 报名活动
 `POST /api/activities/<pk>/join/` — 需 Token
 
 ```json
 // 请求
-{"role": "volunteer"}  // 医生可传 "doctor"，其他账户强制 "volunteer"
+{"role": "volunteer"}  // 已审批医生可传 "doctor"，其他账户强制 "volunteer"
 ```
 
 ### 4. 取消报名

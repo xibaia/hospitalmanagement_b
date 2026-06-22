@@ -5,6 +5,7 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.db.models import Q
 from django.http import HttpResponseRedirect
 from django.shortcuts import redirect, render
+from django.utils import timezone
 
 from hospital import forms, models
 from .common import is_doctor
@@ -182,6 +183,7 @@ def doctor_create_record_view(request):
         if form.is_valid() and formset.is_valid():
             record = form.save(commit=False)
             record.doctor = doctor
+            record.doctor_confirmed = False
             record.save()
             # 保存牙位 formset
             instances = formset.save(commit=False)
@@ -198,9 +200,9 @@ def doctor_create_record_view(request):
 @login_required(login_url='doctorlogin')
 @user_passes_test(is_doctor, login_url="doctorlogin")
 def doctor_update_record_view(request, pk):
-    from django.utils import timezone
     doctor = models.Doctor.objects.get(user_id=request.user.id)
     record = models.MedicalRecord.objects.get(id=pk)
+    was_confirmed = record.doctor_confirmed
     form = forms.MedicalRecordForm(instance=record)
     formset = forms.ToothFindingFormSet(instance=record)
     if request.method == 'POST':
@@ -209,7 +211,7 @@ def doctor_update_record_view(request, pk):
         if form.is_valid() and formset.is_valid():
             r = form.save(commit=False)
             # 首次确认时记录时间
-            if r.doctor_confirmed and not record.doctor_confirmed:
+            if r.doctor_confirmed and not was_confirmed:
                 r.confirmed_at = timezone.now()
             r.save()
             formset.save()

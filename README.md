@@ -71,7 +71,7 @@ python manage.py runserver
 | 变量 | 默认值 | 说明 |
 |------|--------|------|
 | `DJANGO_ENV` | `development` | `development` 用 SQLite，`production` 用 PostgreSQL |
-| `SECRET_KEY` | 内置默认值 | 生产环境必须修改 |
+| `SECRET_KEY` | `your-secret-key-here` | 生产环境必须修改 |
 | `DEBUG` | `True` | 生产环境设为 `False` |
 | `ALLOWED_HOSTS` | `localhost,127.0.0.1` | 生产环境填服务器域名/IP |
 | `DB_NAME` | `oral_screening` | PostgreSQL 数据库名 |
@@ -123,7 +123,7 @@ python manage.py collectstatic --noinput --dry-run
 COMPOSE_DISABLE_ENV_FILE=1 docker compose config
 ```
 
-当前自动化测试覆盖患者/医生登录、角色隔离、分页、活动报名、病历所有权和牙位校验等核心 API。
+当前 28 个自动化测试覆盖患者/医生登录、角色隔离、分页、活动列表/详情、活动报名、病历所有权、Web 审批态访问、管理端 POST 操作和牙位校验等核心路径。
 
 ## 📚 维护文档
 

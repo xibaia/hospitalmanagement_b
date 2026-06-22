@@ -5,7 +5,7 @@ from rest_framework import status
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 
-from hospital.models import ActivityParticipant, Doctor
+from hospital.models import ActivityParticipant, Doctor, Patient
 
 
 ROLE_DOCTOR = 'DOCTOR'
@@ -29,11 +29,21 @@ def paginated_response(request, queryset, serializer_class, context=None, messag
 
 
 def user_is_doctor(user):
-    return user.groups.filter(name=ROLE_DOCTOR).exists()
+    return bool(
+        user
+        and user.is_authenticated
+        and user.groups.filter(name=ROLE_DOCTOR).exists()
+        and Doctor.objects.filter(user=user, status=True).exists()
+    )
 
 
 def user_is_patient(user):
-    return user.groups.filter(name=ROLE_PATIENT).exists()
+    return bool(
+        user
+        and user.is_authenticated
+        and user.groups.filter(name=ROLE_PATIENT).exists()
+        and Patient.objects.filter(user=user, status=True).exists()
+    )
 
 
 def activity_annotate(user):

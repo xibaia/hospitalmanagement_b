@@ -112,6 +112,41 @@ class ActivityAPITests(APITestCase):
         participant = ActivityParticipant.objects.get(activity=activity, user=doctor_user)
         self.assertEqual(participant.role, "doctor")
 
+    def test_pending_doctor_token_cannot_read_draft_activity_as_doctor(self):
+        pending_doctor_user, _ = create_doctor(
+            username="pending_activity_doctor",
+            status=False,
+        )
+        draft_activity = create_activity(
+            name="Draft activity",
+            status="draft",
+        )
+
+        response = self.client.get(
+            reverse("api-activity-detail", args=[draft_activity.id]),
+            **auth_headers(pending_doctor_user),
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_pending_doctor_join_role_is_downgraded_to_volunteer(self):
+        pending_doctor_user, _ = create_doctor(
+            username="pending_join_activity_doctor",
+            status=False,
+        )
+        activity = create_activity()
+
+        response = self.client.post(
+            reverse("api-activity-join", args=[activity.id]),
+            {"role": "doctor"},
+            format="json",
+            **auth_headers(pending_doctor_user),
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        participant = ActivityParticipant.objects.get(activity=activity, user=pending_doctor_user)
+        self.assertEqual(participant.role, "volunteer")
+
     def test_user_can_leave_joined_activity(self):
         patient_user, _ = create_patient(username="leave_activity_patient")
         activity = create_activity()

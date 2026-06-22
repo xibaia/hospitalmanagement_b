@@ -2,6 +2,7 @@
 
 > 创建时间：2026-03-21
 > 状态：Phase 1-6 已完成（2026-03-21）
+> 维护同步：2026-06-22，已同步当前 `hospital/views/` 拆分结构和 POST 操作约束。
 
 ---
 
@@ -79,10 +80,11 @@ doctor-dashboard
 ## 技术约定
 
 - 模板继承现有 Bootstrap 风格，放在 `templates/hospital/` 下
-- 视图函数写在 `hospital/views.py`，按角色分区注释
+- 视图函数已拆分到 `hospital/views/` 包：管理员在 `admin.py`，医生在 `doctor.py`，患者在 `patient.py`，公共入口在 `public.py`
 - URL 追加到 `hospitalmanagement/urls.py` 对应区块
 - 表单写在 `hospital/forms.py`
 - 牙位图（FDI 32颗牙）使用自定义 HTML + JS 渲染，formset 提交
+- 审批、拒绝、删除等写操作必须使用 POST 表单并携带 CSRF token，页面按钮不能再用 GET 链接触发
 
 ---
 
@@ -91,4 +93,5 @@ doctor-dashboard
 | 级别 | 描述 |
 |------|------|
 | MEDIUM | 病历页牙位图（FDI 32颗牙）需自定义 UI，formset 较复杂 |
+| MEDIUM | 医生端病历和预约仍需持续收紧对象级权限 |
 | LOW | 现有模板风格需保持一致（Bootstrap） |

@@ -228,6 +228,10 @@
 .btnEdit:hover  { background: #dbeafe; color: #1d4ed8; text-decoration: none; }
 .btnDel   { background: #fff1f2; color: #ef4444; margin-left: auto; }
 .btnDel:hover   { background: #fee2e2; color: #b91c1c; text-decoration: none; }
+.deleteActionForm { display: inline-flex; margin: 0; }
+.deleteActionForm .btnAction { border: 0; cursor: pointer; font-family: inherit; }
+.actCardFoot .deleteActionForm { margin-left: auto; }
+.actCardFoot .deleteActionForm .btnDel { margin-left: 0; }
 
 .emptyState {
   grid-column: 1 / -1;
@@ -330,10 +334,13 @@
         <a href="{% url 'update-activity' a.id %}" class="btnAction btnEdit">
           <i class="fa fa-pencil"></i> 编辑
         </a>
-        <a href="{% url 'delete-activity' a.id %}" class="btnAction btnDel"
-           onclick="return confirm('确认删除「{{ a.name }}」？此操作不可恢复。')">
-          <i class="fa fa-trash"></i>
-        </a>
+        <form method="post" action="{% url 'delete-activity' a.id %}" class="deleteActionForm">
+          {% csrf_token %}
+          <button type="submit" class="btnAction btnDel"
+                  onclick="return confirm('确认删除「{{ a.name }}」？此操作不可恢复。')">
+            <i class="fa fa-trash"></i>
+          </button>
+        </form>
       </div>
     </div>
     {% empty %}

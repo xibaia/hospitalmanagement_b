@@ -17,7 +17,8 @@ from hospital.services.activity import ACTIVITY_STATUS_ACTIVE, PARTICIPANT_ROLE_
 @permission_classes([IsAuthenticated])
 def activities_list_api(request):
     qs = Activity.objects.annotate(**activity_annotate(request.user)).order_by('-start_time')
-    if not user_is_doctor(request.user):
+    is_doctor = user_is_doctor(request.user)
+    if not is_doctor:
         qs = qs.filter(status=ACTIVITY_STATUS_ACTIVE)
     return paginated_response(request, qs, ActivityListSerializer, context={'request': request})
 
@@ -25,9 +26,10 @@ def activities_list_api(request):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def activity_detail_api(request, pk):
+    is_doctor = user_is_doctor(request.user)
     try:
         qs = Activity.objects.annotate(**activity_annotate(request.user))
-        if not user_is_doctor(request.user):
+        if not is_doctor:
             qs = qs.filter(status=ACTIVITY_STATUS_ACTIVE)
         activity = qs.get(pk=pk)
     except Activity.DoesNotExist:
@@ -35,7 +37,7 @@ def activity_detail_api(request, pk):
 
     serializer = ActivityDetailSerializer(
         activity,
-        context={'request': request, 'show_participants': user_is_doctor(request.user)},
+        context={'request': request, 'show_participants': is_doctor},
     )
     return Response({'success': True, 'data': serializer.data})
 
