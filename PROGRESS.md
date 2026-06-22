@@ -74,14 +74,14 @@
 | H1 | views.py | patient_dashboard_view Doctor.get() 在 assignedDoctorId=None 时崩溃 | ✅ 已修复（改 filter().first() + None guard）|
 | H2 | views.py | 10处 approve/reject/delete 操作接受 GET 请求（CSRF）| ✅ 已修复（统一加 POST guard）|
 | H3 | views.py/forms.py | update_doctor/patient_view 用含 password 的 Form，save() 覆盖密码 | ✅ 已修复（新增 DoctorUserUpdateForm / PatientUserUpdateForm）|
-| M1 | serializers.py | PatientInfoSerializer N+1 查询 | ⬜ 待修 |
-| M3 | api_views.py | doctor_update_record_api 缺所有权校验 | ⬜ 待修 |
-| M4 | api_views.py | 多处 get() 缺 404 保护 | ⬜ 待修 |
-| M5 | serializers.py | MedicalRecordCreateSerializer patient 无所有权校验 | ⬜ 待修 |
-| M6 | api_views.py | 分页配置不生效 | ⬜ 待修 |
-| L1 | views.py | PDF 中文乱码（ISO-8859-1）| ⬜ 待修 |
-| L2 | serializers.py | symptoms/address required=False 未设 | ⬜ 待修 |
-| L4 | serializers.py | ToothFinding tooth_number 无范围校验 | ⬜ 待修 |
+| M1 | serializers.py | PatientInfoSerializer N+1 查询 | ✅ 已修复 |
+| M3 | api_views.py | doctor_update_record_api 缺所有权校验 | ✅ 已修复 |
+| M4 | api_views.py | 多处 get() 缺 404 保护 | ✅ 已复核 |
+| M5 | serializers.py | MedicalRecordCreateSerializer patient 无所有权校验 | ✅ 已修复 |
+| M6 | api_views.py | 分页配置不生效 | ✅ 已修复 |
+| L1 | views.py | PDF 中文乱码（ISO-8859-1）| ✅ 已修复 |
+| L2 | serializers.py | symptoms/address required=False 未设 | ✅ 已修复 |
+| L4 | serializers.py | ToothFinding tooth_number 无范围校验 | ✅ 已修复 |
 
 ## 架构级问题（已修复）
 

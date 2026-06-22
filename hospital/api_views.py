@@ -3,6 +3,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
+from rest_framework.pagination import PageNumberPagination
 from django.contrib.auth import login
 from django.contrib.auth.models import User
 from django.utils import timezone
@@ -27,6 +28,32 @@ from .serializers import (
     PatientUpdateSerializer,
 )
 from django.db.models import Count, Exists, OuterRef
+
+
+def _paginated_response(request, queryset, serializer_class, context=None, message=None):
+    paginator = PageNumberPagination()
+    page = paginator.paginate_queryset(queryset, request)
+    serializer = serializer_class(page if page is not None else queryset, many=True, context=context or {})
+    payload = {'success': True, 'data': serializer.data}
+    if message:
+        payload['message'] = message
+    if page is not None:
+        payload.update({
+            'count': paginator.page.paginator.count,
+            'next': paginator.get_next_link(),
+            'previous': paginator.get_previous_link(),
+        })
+    return Response(payload)
+
+
+def _patient_info_context(patient):
+    doctor_map = {}
+    if patient.assignedDoctorId:
+        doctor_map = {
+            doctor.user_id: doctor
+            for doctor in Doctor.objects.filter(user_id=patient.assignedDoctorId)
+        }
+    return {'assigned_doctor_map': doctor_map}
 
 
 @api_view(['POST'])
@@ -132,8 +159,8 @@ def patient_login_api(request):
         
         # 获取患者信息
         try:
-            patient = Patient.objects.get(user=user)
-            patient_serializer = PatientInfoSerializer(patient)
+            patient = Patient.objects.select_related('user').get(user=user)
+            patient_serializer = PatientInfoSerializer(patient, context=_patient_info_context(patient))
             
             return Response({
                 'success': True,
@@ -194,8 +221,8 @@ def patient_info_api(request):
     }
     """
     try:
-        patient = Patient.objects.get(user=request.user)
-        serializer = PatientInfoSerializer(patient)
+        patient = Patient.objects.select_related('user').get(user=request.user)
+        serializer = PatientInfoSerializer(patient, context=_patient_info_context(patient))
         
         return Response({
             'success': True,
@@ -231,14 +258,8 @@ def doctors_list_api(request):
         ]
     }
     """
-    doctors = Doctor.objects.filter(status=True)
-    serializer = DoctorListSerializer(doctors, many=True)
-    
-    return Response({
-        'success': True,
-        'message': '获取成功',
-        'data': serializer.data
-    }, status=status.HTTP_200_OK)
+    doctors = Doctor.objects.filter(status=True).order_by('id')
+    return _paginated_response(request, doctors, DoctorListSerializer, message='获取成功')
 
 
 @api_view(['POST'])
@@ -299,13 +320,13 @@ def update_patient_info_api(request):
         return Response({'success': False, 'message': '参数错误', 'errors': update_serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
     try:
-        patient = Patient.objects.get(user=request.user)
+        patient = Patient.objects.select_related('user').get(user=request.user)
 
         for field, value in update_serializer.validated_data.items():
             setattr(patient, field, value)
         patient.save()
 
-        serializer = PatientInfoSerializer(patient)
+        serializer = PatientInfoSerializer(patient, context=_patient_info_context(patient))
         return Response({'success': True, 'message': '更新成功', 'data': serializer.data})
 
     except Patient.DoesNotExist:
@@ -503,13 +524,7 @@ def patient_records_api(request):
             patient=patient
         ).select_related('doctor', 'activity').order_by('-check_date', '-created_at')
 
-        serializer = MedicalRecordListSerializer(records, many=True)
-
-        return Response({
-            'success': True,
-            'message': '获取成功',
-            'data': serializer.data
-        }, status=status.HTTP_200_OK)
+        return _paginated_response(request, records, MedicalRecordListSerializer, message='获取成功')
 
     except Patient.DoesNotExist:
         return Response({
@@ -641,8 +656,12 @@ def activities_list_api(request):
     if not _user_is_doctor(request.user):
         qs = qs.filter(status=ACTIVITY_STATUS_ACTIVE)
 
-    serializer = ActivityListSerializer(qs, many=True, context={'request': request})
-    return Response({'success': True, 'data': serializer.data})
+    return _paginated_response(
+        request,
+        qs,
+        ActivityListSerializer,
+        context={'request': request}
+    )
 
 
 @api_view(['GET'])
@@ -745,12 +764,12 @@ def my_activities_api(request):
     participation_map = {p.activity_id: p for p in participations}
     activities = [p.activity for p in participations]
 
-    serializer = MyActivitySerializer(
+    return _paginated_response(
+        request,
         activities,
-        many=True,
+        MyActivitySerializer,
         context={'participation_map': participation_map}
     )
-    return Response({'success': True, 'data': serializer.data})
 
 
 # ==================== 医生端 API ====================
@@ -812,8 +831,7 @@ def doctor_patients_api(request):
         qs = qs.filter(Q(real_name__icontains=search) | Q(mobile__icontains=search))
 
     patients = qs.annotate(record_count=Count('records')).order_by('-created_at')
-    serializer = PatientSimpleSerializer(patients, many=True)
-    return Response({'success': True, 'data': serializer.data})
+    return _paginated_response(request, patients, PatientSimpleSerializer)
 
 
 @api_view(['GET'])
@@ -858,11 +876,10 @@ def doctor_records_api(request):
         if activity_id:
             records = records.filter(activity_id=activity_id)
 
-        serializer = MedicalRecordListSerializer(records, many=True)
-        return Response({'success': True, 'data': serializer.data})
+        return _paginated_response(request, records, MedicalRecordListSerializer)
 
     # POST：创建病历
-    serializer = MedicalRecordCreateSerializer(data=request.data)
+    serializer = MedicalRecordCreateSerializer(data=request.data, context={'doctor': request.doctor})
     if serializer.is_valid():
         record = serializer.save(doctor=request.doctor)
         return Response({
@@ -896,7 +913,7 @@ def doctor_record_detail_api(request, pk):
     if record.doctor_confirmed:
         return Response({'success': False, 'message': '病历已确认，无法修改'}, status=status.HTTP_400_BAD_REQUEST)
 
-    serializer = MedicalRecordCreateSerializer(record, data=request.data, partial=True)
+    serializer = MedicalRecordCreateSerializer(record, data=request.data, partial=True, context={'doctor': request.doctor})
     if serializer.is_valid():
         serializer.save()
         return Response({'success': True, 'message': '病历更新成功'})
@@ -962,5 +979,4 @@ def patient_medical_history_api(request):
 def stations_list_api(request):
     """GET /api/stations/ 获取启用的义诊站点列表"""
     stations = Station.objects.filter(is_active=True).order_by('name')
-    serializer = StationSerializer(stations, many=True)
-    return Response({'success': True, 'data': serializer.data})
+    return _paginated_response(request, stations, StationSerializer)

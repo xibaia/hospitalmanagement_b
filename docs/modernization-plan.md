@@ -1,7 +1,7 @@
 # 技术栈现代化与维护性改造计划
 
 > 创建时间：2026-06-22  
-> 当前状态：阶段 0-3 已完成，准备进入阶段 4  
+> 当前状态：阶段 0-4 已完成，准备进入阶段 5  
 > 适用项目：医院管理系统 / 口腔筛查管理后端  
 > 执行原则：先跑稳，再升级，再拆分；每个阶段都要可验证、可回滚。
 
@@ -458,20 +458,55 @@ djangorestframework==3.17.x
 
 | 状态 | 编号 | 问题 |
 |------|------|------|
-| [ ] | M1 | `PatientInfoSerializer` N+1 查询 |
-| [ ] | M3 | `doctor_update_record_api` 缺所有权校验 |
-| [ ] | M4 | 多处 `get()` 缺 404 保护 |
-| [ ] | M5 | `MedicalRecordCreateSerializer` patient 无所有权校验 |
-| [ ] | M6 | 分页配置不生效 |
-| [ ] | L1 | PDF 中文乱码 |
-| [ ] | L2 | `symptoms/address required=False` 未设 |
-| [ ] | L4 | `ToothFinding.tooth_number` 无范围校验 |
+| [x] | M1 | `PatientInfoSerializer` N+1 查询 |
+| [x] | M3 | `doctor_update_record_api` 缺所有权校验 |
+| [x] | M4 | 多处 `get()` 缺 404 保护 |
+| [x] | M5 | `MedicalRecordCreateSerializer` patient 无所有权校验 |
+| [x] | M6 | 分页配置不生效 |
+| [x] | L1 | PDF 中文乱码 |
+| [x] | L2 | `symptoms/address required=False` 未设 |
+| [x] | L4 | `ToothFinding.tooth_number` 无范围校验 |
 
 ### 9.1 验收标准
 
 - 每个待修问题都有对应代码修复。
 - 中危问题优先补测试。
 - `PROGRESS.md` 状态同步更新。
+
+### 9.2 执行记录（2026-06-22）
+
+代码修复：
+
+| 问题 | 处理 |
+|------|------|
+| `PatientInfoSerializer` 查询分配医生名 | 增加 `assigned_doctor_map` context，调用方使用 `select_related('user')` 并预取医生映射 |
+| 医生病历创建/更新所有权 | `MedicalRecordCreateSerializer` 接收当前医生 context，只允许给分配给自己的患者或已有自己病历记录的患者创建；更新时禁止修改病历所属患者 |
+| API `get()` 404 风险 | 复核 API 中 `get()` 调用，现有路径均有 404/权限响应；新增所有权测试覆盖医生病历路径 |
+| 分页配置不生效 | 新增 `_paginated_response`，接入医生列表、患者病历、活动列表、我的活动、医生患者列表、医生病历列表、站点列表 |
+| PDF 中文乱码 | `render_to_pdf` 编码从 `ISO-8859-1` 改为 `UTF-8`，并传入 `encoding='UTF-8'` |
+| `symptoms/address required=False` | `PatientUpdateSerializer` 已确认设置 `required=False` |
+| 牙位范围校验 | `ToothFindingWriteSerializer.validate_tooth_number` 限制合法 FDI 编码：11-18、21-28、31-38、41-48 |
+
+新增/扩展测试：
+
+| 测试 | 覆盖 |
+|------|------|
+| `test_doctors_list_uses_page_size` | 验证分页返回 `count` 且默认每页 20 条 |
+| `test_doctor_can_create_record_for_assigned_patient` | 医生可为分配给自己的患者创建病历 |
+| `test_doctor_cannot_create_record_for_unrelated_patient` | 医生不能为无关患者创建病历 |
+| `test_doctor_cannot_change_record_patient_on_update` | 医生更新病历时不能修改所属患者 |
+| `test_doctor_record_rejects_invalid_tooth_number` | 非法牙位编码返回 400 |
+
+验证结果：
+
+```bash
+python manage.py check
+python manage.py migrate --check
+python manage.py test
+python -m pip check
+```
+
+结果：`18 tests` 全部通过，无 broken requirements。
 
 ---
 

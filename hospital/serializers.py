@@ -138,6 +138,9 @@ class PatientInfoSerializer(serializers.ModelSerializer):
     def get_assigned_doctor_name(self, obj):
         """获取分配医生姓名"""
         if obj.assignedDoctorId:
+            doctor = self.context.get('assigned_doctor_map', {}).get(obj.assignedDoctorId)
+            if doctor:
+                return doctor.get_name
             try:
                 doctor = Doctor.objects.get(user_id=obj.assignedDoctorId)
                 return doctor.get_name
@@ -443,6 +446,17 @@ class ToothFindingWriteSerializer(serializers.ModelSerializer):
         model = ToothFinding
         fields = ['tooth_number', 'finding_type', 'note']
 
+    def validate_tooth_number(self, value):
+        valid_ranges = (
+            range(11, 19),
+            range(21, 29),
+            range(31, 39),
+            range(41, 49),
+        )
+        if not any(value in valid_range for valid_range in valid_ranges):
+            raise serializers.ValidationError('牙位必须是合法 FDI 编码（11-18、21-28、31-38、41-48）')
+        return value
+
 
 class MedicalRecordCreateSerializer(serializers.ModelSerializer):
     """病历创建/更新序列化器（支持批量写入牙位检查）"""
@@ -460,6 +474,23 @@ class MedicalRecordCreateSerializer(serializers.ModelSerializer):
             'intraoral_note', 'diagnosis',
             'tooth_findings',
         ]
+
+    def validate(self, attrs):
+        doctor = self.context.get('doctor')
+        if not doctor:
+            return attrs
+
+        patient = attrs.get('patient') or (self.instance.patient if self.instance else None)
+        if self.instance and 'patient' in attrs and attrs['patient'] != self.instance.patient:
+            raise serializers.ValidationError({'patient': '病历所属患者不可修改'})
+
+        if patient:
+            is_assigned = patient.assignedDoctorId == doctor.user_id
+            has_existing_record = MedicalRecord.objects.filter(patient=patient, doctor=doctor).exists()
+            if not (is_assigned or has_existing_record):
+                raise serializers.ValidationError({'patient': '只能为分配给自己的患者或已有自己病历记录的患者创建病历'})
+
+        return attrs
 
     def create(self, validated_data):
         tooth_findings_data = validated_data.pop('tooth_findings', [])

@@ -17,3 +17,13 @@ class DoctorDirectoryAPITests(APITestCase):
         doctor_names = {item["doctor_name"] for item in response.data["data"]}
         self.assertIn(approved.get_name, doctor_names)
         self.assertEqual(len(response.data["data"]), 1)
+
+    def test_doctors_list_uses_page_size(self):
+        for index in range(25):
+            create_doctor(username=f"paged_doctor_{index}", status=True)
+
+        response = self.client.get(reverse("api-doctors-list"))
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["count"], 25)
+        self.assertEqual(len(response.data["data"]), 20)
