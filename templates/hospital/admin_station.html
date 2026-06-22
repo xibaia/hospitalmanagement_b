@@ -16,7 +16,13 @@
         <tr>
           <td>{{ s.name }}</td>
           <td>{{ s.address }}</td>
-          <td>{{ s.supervisor.get_full_name|default:s.supervisor.username|default:"—" }}</td>
+          <td>
+            {% if s.supervisor %}
+              {{ s.supervisor.get_full_name|default:s.supervisor.username }}
+            {% else %}
+              —
+            {% endif %}
+          </td>
           <td>{{ s.phone|default:"—" }}</td>
           <td>
             {% if s.is_active %}<span class="label label-success">启用</span>

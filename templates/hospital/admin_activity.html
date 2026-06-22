@@ -317,7 +317,14 @@
           </div>
           <div class="actMetaItem">
             <i class="fa fa-user-circle-o"></i>
-            <span>负责人：{{ a.leader.get_full_name|default:a.leader.username }}</span>
+            <span>
+              负责人：
+              {% if a.leader %}
+                {{ a.leader.get_full_name|default:a.leader.username }}
+              {% else %}
+                未指定
+              {% endif %}
+            </span>
           </div>
           {% if a.description %}
           <div class="actMetaItem">

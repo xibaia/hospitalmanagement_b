@@ -4,7 +4,7 @@ from io import BytesIO
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.db.models import Q
 from django.http import HttpResponseRedirect
-from django.shortcuts import redirect, render
+from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 
 from hospital import forms, models
@@ -19,10 +19,7 @@ def doctor_dashboard_view(request):
     appointmentcount=models.Appointment.objects.filter(status=True,doctor=doctor).count()
     patientdischarged=models.PatientDischargeDetails.objects.distinct().filter(assignedDoctorName=doctor.get_name).count()
 
-    appointments=models.Appointment.objects.filter(status=True,doctor=doctor).order_by('-id')
-    patientid=[a.patient_id for a in appointments]
-    patients=models.Patient.objects.filter(status=True,id__in=patientid).order_by('-id')
-    appointments=zip(appointments,patients)
+    appointments=models.Appointment.objects.filter(status=True,doctor=doctor).select_related('patient').order_by('-id')
     mydict={
     'patientcount':patientcount,
     'appointmentcount':appointmentcount,
@@ -119,33 +116,25 @@ def doctor_appointment_view(request):
 @user_passes_test(is_doctor, login_url="doctorlogin")
 def doctor_view_appointment_view(request):
     doctor=models.Doctor.objects.get(user_id=request.user.id) #for profile picture of doctor in sidebar
-    appointments=models.Appointment.objects.filter(status=True,doctor__user=request.user)
-    patientid=[a.patient_id for a in appointments]
-    patients=models.Patient.objects.filter(status=True,id__in=patientid)
-    appointments=zip(appointments,patients)
+    appointments=models.Appointment.objects.filter(status=True,doctor=doctor).select_related('patient')
     return render(request,'hospital/doctor_view_appointment.html',{'appointments':appointments,'doctor':doctor})
 
 @login_required(login_url='doctorlogin')
 @user_passes_test(is_doctor, login_url="doctorlogin")
 def doctor_delete_appointment_view(request):
     doctor=models.Doctor.objects.get(user_id=request.user.id) #for profile picture of doctor in sidebar
-    appointments=models.Appointment.objects.filter(status=True,doctor__user=request.user)
-    patientid=[a.patient_id for a in appointments]
-    patients=models.Patient.objects.filter(status=True,id__in=patientid)
-    appointments=zip(appointments,patients)
+    appointments=models.Appointment.objects.filter(status=True,doctor=doctor).select_related('patient')
     return render(request,'hospital/doctor_delete_appointment.html',{'appointments':appointments,'doctor':doctor})
 
 @login_required(login_url='doctorlogin')
 @user_passes_test(is_doctor, login_url="doctorlogin")
 def delete_appointment_view(request,pk):
-    appointment=models.Appointment.objects.get(id=pk)
-    appointment.delete()
+    if request.method != 'POST':
+        return redirect('doctor-delete-appointment')
     doctor=models.Doctor.objects.get(user_id=request.user.id)
-    appointments=models.Appointment.objects.filter(status=True,doctor=doctor)
-    patientid=[a.patient_id for a in appointments]
-    patients=models.Patient.objects.filter(status=True,id__in=patientid)
-    appointments=zip(appointments,patients)
-    return render(request,'hospital/doctor_delete_appointment.html',{'appointments':appointments,'doctor':doctor})
+    appointment=get_object_or_404(models.Appointment, id=pk, doctor=doctor)
+    appointment.delete()
+    return redirect('doctor-delete-appointment')
 
 
 

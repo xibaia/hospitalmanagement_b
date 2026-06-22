@@ -38,6 +38,7 @@ def patient_book_appointment_view(request):
     mydict={'appointmentForm':appointmentForm,'patient':patient,'message':message}
     if request.method=='POST':
         appointmentForm=forms.PatientAppointmentForm(request.POST)
+        mydict={'appointmentForm':appointmentForm,'patient':patient,'message':message}
         if appointmentForm.is_valid():
             appointment=appointmentForm.save(commit=False)
             appointment.patient=models.Patient.objects.get(user=request.user)
@@ -45,7 +46,7 @@ def patient_book_appointment_view(request):
             appointment.patientName=request.user.first_name
             appointment.status=False
             appointment.save()
-        return HttpResponseRedirect('patient-view-appointment')
+            return HttpResponseRedirect('patient-view-appointment')
     return render(request,'hospital/patient_book_appointment.html',context=mydict)
 
 @login_required(login_url='patientlogin')

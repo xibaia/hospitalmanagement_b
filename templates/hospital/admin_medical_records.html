@@ -24,7 +24,7 @@
           <td>{{ r.patient.get_name }}</td>
           <td>{{ r.check_date }}</td>
           <td>{{ r.get_visit_type_display }}</td>
-          <td>{{ r.doctor.get_full_name|default:r.doctor.username|default:"—" }}</td>
+          <td>{% if r.doctor %}{{ r.doctor.get_name }}{% else %}—{% endif %}</td>
           <td>{{ r.chief_complaint|truncatechars:30|default:"—" }}</td>
           <td>
             {% if r.doctor_confirmed %}<span class="label label-success">是</span>

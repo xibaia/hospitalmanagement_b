@@ -316,7 +316,14 @@
       </div>
       <div class="heroMetaItem">
         <i class="fa fa-user-circle-o"></i>
-        <span>负责人：{{ activity.leader.get_full_name|default:activity.leader.username }}</span>
+        <span>
+          负责人：
+          {% if activity.leader %}
+            {{ activity.leader.get_full_name|default:activity.leader.username }}
+          {% else %}
+            未指定
+          {% endif %}
+        </span>
       </div>
       <div class="heroMetaItem">
         <i class="fa fa-users"></i>

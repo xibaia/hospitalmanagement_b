@@ -104,6 +104,7 @@ def admin_add_doctor_view(request):
     if request.method=='POST':
         userForm=forms.DoctorUserForm(request.POST)
         doctorForm=forms.DoctorForm(request.POST, request.FILES)
+        mydict={'userForm':userForm,'doctorForm':doctorForm}
         if userForm.is_valid() and doctorForm.is_valid():
             user=userForm.save()
             user.set_password(user.password)
@@ -117,7 +118,7 @@ def admin_add_doctor_view(request):
             my_doctor_group = Group.objects.get_or_create(name='DOCTOR')
             my_doctor_group[0].user_set.add(user)
 
-        return HttpResponseRedirect('admin-view-doctor')
+            return HttpResponseRedirect('admin-view-doctor')
     return render(request,'hospital/admin_add_doctor.html',context=mydict)
 
 @login_required(login_url='adminlogin')
@@ -208,6 +209,7 @@ def admin_add_patient_view(request):
     if request.method=='POST':
         userForm=forms.PatientUserForm(request.POST)
         patientForm=forms.PatientForm(request.POST,request.FILES)
+        mydict={'userForm':userForm,'patientForm':patientForm}
         if userForm.is_valid() and patientForm.is_valid():
             user=userForm.save()
             user.set_password(user.password)
@@ -222,7 +224,7 @@ def admin_add_patient_view(request):
             my_patient_group = Group.objects.get_or_create(name='PATIENT')
             my_patient_group[0].user_set.add(user)
 
-        return HttpResponseRedirect('admin-view-patient')
+            return HttpResponseRedirect('admin-view-patient')
     return render(request,'hospital/admin_add_patient.html',context=mydict)
 
 
@@ -377,13 +379,14 @@ def admin_add_appointment_view(request):
     mydict={'appointmentForm':appointmentForm,}
     if request.method=='POST':
         appointmentForm=forms.AppointmentForm(request.POST)
+        mydict={'appointmentForm':appointmentForm,}
         if appointmentForm.is_valid():
             appointment=appointmentForm.save(commit=False)
             appointment.doctorName=appointment.doctor.get_name
             appointment.patientName=appointment.patient.get_name
             appointment.status=True
             appointment.save()
-        return HttpResponseRedirect('admin-view-appointment')
+            return HttpResponseRedirect('admin-view-appointment')
     return render(request,'hospital/admin_add_appointment.html',context=mydict)
 
 @login_required(login_url='adminlogin')
