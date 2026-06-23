@@ -123,7 +123,7 @@ python manage.py collectstatic --noinput --dry-run
 COMPOSE_DISABLE_ENV_FILE=1 docker compose config
 ```
 
-当前 28 个自动化测试覆盖患者/医生登录、角色隔离、分页、活动列表/详情、活动报名、病历所有权、Web 审批态访问、管理端 POST 操作和牙位校验等核心路径。
+当前 WebUI 自动化完整回归可通过 `./scripts/check_webui.sh` 运行；最近一次文档记录为 78 个测试通过。自动化测试说明见 `docs/automation-testing-readme.md`，该文档末尾记录了生成时的上一笔 Git 提交 hash，用于判断文档是否可能过期。
 
 ## 📚 维护文档
 
@@ -135,6 +135,7 @@ COMPOSE_DISABLE_ENV_FILE=1 docker compose config
 | `docs/deployment.md` | 本地与 Docker/Gunicorn/PostgreSQL 部署步骤 |
 | `docs/upgrade-notes.md` | Python/Django/DRF 升级和兼容性记录 |
 | `docs/modernization-plan.md` | 技术栈现代化完整执行计划和记录 |
+| `docs/automation-testing-readme.md` | WebUI 自动化测试使用说明、覆盖矩阵、巡检结论和文档基准提交 hash |
 
 ---
 

@@ -1,5 +1,7 @@
 # WebUI 自动化测试
 
+完整总览见：`docs/automation-testing-readme.md`。
+
 ## 测试栈
 
 本项目使用 Django `TestCase` 覆盖服务端权限和数据状态，使用 Django `StaticLiveServerTestCase` + Playwright Python 覆盖真实 WebUI 交互。
